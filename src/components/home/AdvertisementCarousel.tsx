@@ -17,13 +17,15 @@ interface AdvertisementCarouselProps {
   interval?: number; // in seconds
 }
 
+import { fetchAdvertisements } from "@/lib/api";
+
 // Mock advertisements data with direct product links
 const mockAdvertisements: Advertisement[] = [
   {
     id: "ad1",
     imageUrl:
       "https://images.unsplash.com/photo-1607082348824-0a96f2a4b9da?w=1400&q=80",
-    redirectUrl: "/products/prod-007", // Direct link to headphones product
+    redirectUrl: "/products/00000000-0000-0000-0000-000000000001", // Direct link to headphones product
     title: "Premium Headphones - 25% Off",
     duration: 5,
   },
@@ -31,7 +33,7 @@ const mockAdvertisements: Advertisement[] = [
     id: "ad2",
     imageUrl:
       "https://images.unsplash.com/photo-1607083206968-13611e3d76db?w=1400&q=80",
-    redirectUrl: "/products/prod-010", // Direct link to Smart TV product
+    redirectUrl: "/products/category/electronics", // Link to electronics category
     title: "New Ultra HD Smart TVs - Shop Now",
     duration: 5,
   },
@@ -39,19 +41,46 @@ const mockAdvertisements: Advertisement[] = [
     id: "ad3",
     imageUrl:
       "https://images.unsplash.com/photo-1607083206869-4c7672e72a8a?w=1400&q=80",
-    redirectUrl: "/products/prod-008", // Direct link to speaker product
+    redirectUrl: "/products/00000000-0000-0000-0000-000000000003", // Direct link to speaker product
     title: "Bluetooth Speakers - 30% Off",
     duration: 5,
   },
 ];
 
 const AdvertisementCarousel = ({
-  advertisements = mockAdvertisements,
+  advertisements: propAdvertisements,
   autoPlay = true,
   interval = 5, // 5 seconds default
 }: AdvertisementCarouselProps) => {
+  const [advertisements, setAdvertisements] =
+    useState<Advertisement[]>(mockAdvertisements);
   const [currentIndex, setCurrentIndex] = useState(0);
+  const [isLoading, setIsLoading] = useState(true);
   const navigate = useNavigate();
+
+  // Load advertisements from database
+  useEffect(() => {
+    const loadAdvertisements = async () => {
+      try {
+        if (propAdvertisements) {
+          setAdvertisements(propAdvertisements);
+          setIsLoading(false);
+          return;
+        }
+
+        const ads = await fetchAdvertisements();
+        if (ads && ads.length > 0) {
+          setAdvertisements(ads);
+        }
+      } catch (error) {
+        console.error("Error loading advertisements:", error);
+      } finally {
+        setIsLoading(false);
+      }
+    };
+
+    loadAdvertisements();
+  }, [propAdvertisements]);
 
   // Auto-play functionality
   useEffect(() => {

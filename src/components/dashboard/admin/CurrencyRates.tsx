@@ -53,18 +53,27 @@ const CurrencyRates = () => {
   const onSubmit = async (data: FormValues) => {
     setIsLoading(true);
     try {
-      // Update the exchange rates in the context
-      setExchangeRates({
+      // Update the exchange rates in the context and database
+      const result = await setExchangeRates({
         usdToIqd: data.usdToIqd,
         sarToIqd: data.sarToIqd,
         usdToSar: data.usdToSar,
       });
 
-      setLastUpdated(new Date());
-      toast({
-        title: t("currencyRates"),
-        description: "The exchange rates have been updated successfully.",
-      });
+      if (result.success) {
+        toast({
+          title: t("currencyRates"),
+          description: "The exchange rates have been updated successfully.",
+        });
+      } else {
+        toast({
+          variant: "destructive",
+          title: "Update failed",
+          description:
+            result.error ||
+            "Failed to update currency rates in database. Local rates updated.",
+        });
+      }
     } catch (error) {
       toast({
         variant: "destructive",

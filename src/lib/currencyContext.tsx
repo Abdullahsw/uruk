@@ -1,4 +1,5 @@
 import React, { createContext, useContext, useState, useEffect } from "react";
+import { fetchCurrencyRates, updateCurrencyRates } from "./api";
 
 type Currency = "IQD" | "USD" | "SAR";
 
@@ -15,12 +16,13 @@ type CurrencyContextType = {
     usdToIqd: number;
     sarToIqd: number;
     usdToSar: number;
-  }) => void;
+  }) => Promise<{ success: boolean; error?: string }>;
   convertPrice: (
     price: number,
     fromCurrency: Currency,
     toCurrency: Currency,
   ) => number;
+  lastUpdated: Date | null;
 };
 
 const defaultExchangeRates = {
@@ -34,8 +36,9 @@ const CurrencyContext = createContext<CurrencyContextType>({
   setCurrency: () => {},
   formatPrice: () => "",
   exchangeRates: defaultExchangeRates,
-  setExchangeRates: () => {},
+  setExchangeRates: async () => ({ success: false }),
   convertPrice: () => 0,
+  lastUpdated: null,
 });
 
 export const useCurrency = () => useContext(CurrencyContext);
@@ -44,24 +47,73 @@ export const CurrencyProvider: React.FC<{ children: React.ReactNode }> = ({
   children,
 }) => {
   const [currency, setCurrency] = useState<Currency>("IQD");
-  const [exchangeRates, setExchangeRates] = useState(defaultExchangeRates);
+  const [exchangeRates, setExchangeRatesState] = useState(defaultExchangeRates);
+  const [lastUpdated, setLastUpdated] = useState<Date | null>(null);
+  const [isLoading, setIsLoading] = useState(true);
 
-  // Load exchange rates from localStorage on mount
+  // Load exchange rates from database on mount
   useEffect(() => {
-    const savedRates = localStorage.getItem("exchangeRates");
-    if (savedRates) {
+    const loadRates = async () => {
       try {
-        setExchangeRates(JSON.parse(savedRates));
-      } catch (e) {
-        console.error("Failed to parse saved exchange rates", e);
+        setIsLoading(true);
+        const rates = await fetchCurrencyRates();
+        setExchangeRatesState({
+          usdToIqd: rates.usdToIqd,
+          sarToIqd: rates.sarToIqd,
+          usdToSar: rates.usdToSar,
+        });
+        setLastUpdated(new Date(rates.updatedAt));
+      } catch (error) {
+        console.error("Failed to fetch exchange rates", error);
+        // Fallback to localStorage
+        const savedRates = localStorage.getItem("exchangeRates");
+        if (savedRates) {
+          try {
+            setExchangeRatesState(JSON.parse(savedRates));
+          } catch (e) {
+            console.error("Failed to parse saved exchange rates", e);
+          }
+        }
+      } finally {
+        setIsLoading(false);
       }
-    }
+    };
+
+    loadRates();
   }, []);
 
   // Save exchange rates to localStorage when they change
   useEffect(() => {
-    localStorage.setItem("exchangeRates", JSON.stringify(exchangeRates));
-  }, [exchangeRates]);
+    if (!isLoading) {
+      localStorage.setItem("exchangeRates", JSON.stringify(exchangeRates));
+    }
+  }, [exchangeRates, isLoading]);
+
+  const setExchangeRates = async (rates: {
+    usdToIqd: number;
+    sarToIqd: number;
+    usdToSar: number;
+  }) => {
+    try {
+      // Update in database
+      const result = await updateCurrencyRates(rates);
+
+      if (result.success) {
+        // Update local state
+        setExchangeRatesState(rates);
+        setLastUpdated(new Date());
+        return { success: true };
+      }
+
+      return { success: false, error: result.error };
+    } catch (error) {
+      console.error("Failed to update exchange rates", error);
+      // Still update local state even if database update fails
+      setExchangeRatesState(rates);
+      setLastUpdated(new Date());
+      return { success: false, error: error.message };
+    }
+  };
 
   const convertPrice = (
     price: number,
@@ -106,7 +158,7 @@ export const CurrencyProvider: React.FC<{ children: React.ReactNode }> = ({
       case "IQD":
         return `${convertedPrice.toLocaleString()} IQD`;
       case "USD":
-        return `$${convertedPrice.toFixed(2)}`;
+        return `${convertedPrice.toFixed(2)}`;
       case "SAR":
         return `${convertedPrice.toFixed(2)} SAR`;
       default:
@@ -123,6 +175,7 @@ export const CurrencyProvider: React.FC<{ children: React.ReactNode }> = ({
         exchangeRates,
         setExchangeRates,
         convertPrice,
+        lastUpdated,
       }}
     >
       {children}

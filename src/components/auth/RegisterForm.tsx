@@ -22,12 +22,16 @@ import {
   SelectValue,
 } from "@/components/ui/select";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
-import { supabase } from "@/lib/supabase";
 import { useToast } from "@/components/ui/use-toast";
+import { registerUser } from "@/lib/auth/userOperations";
 
 const formSchema = z
   .object({
     name: z.string().min(2, "Name must be at least 2 characters"),
+    username: z
+      .string()
+      .min(3, "Username must be at least 3 characters")
+      .optional(),
     email: z.string().email("Invalid email address"),
     password: z.string().min(6, "Password must be at least 6 characters"),
     confirmPassword: z.string().min(6, "Confirm password is required"),
@@ -58,6 +62,7 @@ const RegisterForm = ({
     resolver: zodResolver(formSchema),
     defaultValues: {
       name: "",
+      username: "",
       email: "",
       password: "",
       confirmPassword: "",
@@ -69,36 +74,48 @@ const RegisterForm = ({
   const onSubmit = async (data: FormValues) => {
     setIsLoading(true);
     try {
-      // Create a mock user and store in localStorage
-      const user = {
-        id: `user-${Date.now()}`,
-        email: data.email,
-        user_metadata: {
-          name: data.name,
-          account_type: data.accountType,
-          reseller_plan:
-            data.accountType === "reseller" ? data.resellerPlan : undefined,
-        },
+      // Prepare user data for registration
+      const userData = {
+        name: data.name,
+        username: data.username,
+        account_type: data.accountType as "customer" | "reseller" | "admin",
+        reseller_plan:
+          data.accountType === "reseller"
+            ? (data.resellerPlan as "basic" | "standard" | "premium")
+            : undefined,
       };
 
-      // Store user in localStorage for auth persistence
-      localStorage.setItem("user", JSON.stringify(user));
+      // Register the user using our userOperations function
+      const { success, error, user } = await registerUser(
+        data.email,
+        data.password,
+        userData,
+      );
 
-      toast({
-        title: "Registration successful",
-        description: "Your account has been created successfully.",
-      });
+      if (success) {
+        toast({
+          title: "Registration successful",
+          description: "Your account has been created successfully.",
+        });
 
-      // Determine redirect path based on account type
-      const redirectPath =
-        data.accountType === "reseller"
-          ? "/dashboard/reseller"
-          : "/dashboard/user";
+        // Determine redirect path based on account type
+        const redirectPath =
+          data.accountType === "reseller"
+            ? "/dashboard/reseller"
+            : "/dashboard/user";
 
-      // Force page reload to update auth state
-      window.location.href = redirectPath;
+        // Call onSuccess callback
+        onSuccess();
 
-      onSuccess();
+        // Navigate to the appropriate dashboard
+        navigate(redirectPath);
+      } else {
+        toast({
+          variant: "destructive",
+          title: "Registration failed",
+          description: error || "An error occurred during registration",
+        });
+      }
     } catch (error: any) {
       console.error("Registration error:", error);
       toast({
@@ -134,6 +151,27 @@ const RegisterForm = ({
                       disabled={isLoading}
                     />
                   </FormControl>
+                  <FormMessage />
+                </FormItem>
+              )}
+            />
+
+            <FormField
+              control={form.control}
+              name="username"
+              render={({ field }) => (
+                <FormItem>
+                  <FormLabel>Username</FormLabel>
+                  <FormControl>
+                    <Input
+                      placeholder="johndoe"
+                      {...field}
+                      disabled={isLoading}
+                    />
+                  </FormControl>
+                  <FormDescription>
+                    Choose a unique username for your account
+                  </FormDescription>
                   <FormMessage />
                 </FormItem>
               )}
@@ -291,6 +329,7 @@ const RegisterForm = ({
                   variant="link"
                   className="p-0 h-auto font-semibold"
                   onClick={onLoginClick}
+                  type="button"
                 >
                   Login
                 </Button>

@@ -8,34 +8,33 @@ import { Input } from "@/components/ui/input";
 import {
   Form,
   FormControl,
+  FormDescription,
   FormField,
   FormItem,
   FormLabel,
   FormMessage,
 } from "@/components/ui/form";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
-import { loginUser } from "@/lib/auth/userOperations";
 import { useToast } from "@/components/ui/use-toast";
+import { requestPasswordReset } from "@/lib/auth/passwordReset";
 
 const formSchema = z.object({
   email: z.string().email("Invalid email address"),
-  password: z.string().min(6, "Password must be at least 6 characters"),
 });
 
 type FormValues = z.infer<typeof formSchema>;
 
-interface LoginFormProps {
+interface ForgotPasswordFormProps {
   onSuccess?: () => void;
-  onRegisterClick?: () => void;
-  onForgotPasswordClick?: () => void;
+  onLoginClick?: () => void;
 }
 
-const LoginForm = ({
+const ForgotPasswordForm = ({
   onSuccess = () => {},
-  onRegisterClick = () => {},
-  onForgotPasswordClick = () => navigate("/forgot-password"),
-}: LoginFormProps) => {
+  onLoginClick = () => {},
+}: ForgotPasswordFormProps) => {
   const [isLoading, setIsLoading] = useState(false);
+  const [emailSent, setEmailSent] = useState(false);
   const { toast } = useToast();
   const navigate = useNavigate();
 
@@ -43,52 +42,42 @@ const LoginForm = ({
     resolver: zodResolver(formSchema),
     defaultValues: {
       email: "",
-      password: "",
     },
   });
 
   const onSubmit = async (data: FormValues) => {
     setIsLoading(true);
     try {
-      // Use the loginUser function from userOperations
-      const { success, error, user, session } = await loginUser(
-        data.email,
-        data.password,
-      );
+      const result = await requestPasswordReset(data.email);
 
-      if (success) {
-        // Determine redirect path based on account type
-        let redirectPath = "/dashboard/user";
-        const accountType = user?.user_metadata?.account_type;
-
-        if (accountType === "admin") {
-          redirectPath = "/dashboard/admin";
-        } else if (accountType === "reseller") {
-          redirectPath = "/dashboard/reseller";
-        }
-
+      if (result.success) {
+        setEmailSent(true);
         toast({
-          title: "Login successful",
-          description: "You have been logged in successfully.",
+          title: "Reset link sent",
+          description: result.message,
         });
-
-        // Call onSuccess callback
         onSuccess();
 
-        // Navigate to the appropriate dashboard
-        navigate(redirectPath);
+        // In development mode, show the token for testing
+        if (import.meta.env.DEV && result.token) {
+          console.log("Reset token for testing:", result.token);
+          toast({
+            title: "Development Mode",
+            description: `Reset token: ${result.token.substring(0, 8)}...`,
+          });
+        }
       } else {
         toast({
           variant: "destructive",
-          title: "Login failed",
-          description: error || "Invalid credentials",
+          title: "Request failed",
+          description: result.message,
         });
       }
     } catch (error: any) {
-      console.error("Login error:", error);
+      console.error("Password reset request error:", error);
       toast({
         variant: "destructive",
-        title: "Login failed",
+        title: "Request failed",
         description: error.message || "An unexpected error occurred",
       });
     } finally {
@@ -96,10 +85,42 @@ const LoginForm = ({
     }
   };
 
+  if (emailSent) {
+    return (
+      <Card className="w-full max-w-md mx-auto bg-white">
+        <CardHeader>
+          <CardTitle className="text-2xl font-bold text-center">
+            Check Your Email
+          </CardTitle>
+        </CardHeader>
+        <CardContent>
+          <p className="text-center mb-6">
+            We've sent a password reset link to your email address. Please check
+            your inbox and follow the instructions to reset your password.
+          </p>
+          <p className="text-center text-sm text-gray-500 mb-4">
+            If you don't receive an email within a few minutes, check your spam
+            folder or try again.
+          </p>
+          <div className="flex flex-col space-y-2">
+            <Button variant="outline" onClick={() => setEmailSent(false)}>
+              Try Another Email
+            </Button>
+            <Button variant="link" onClick={onLoginClick}>
+              Return to Login
+            </Button>
+          </div>
+        </CardContent>
+      </Card>
+    );
+  }
+
   return (
     <Card className="w-full max-w-md mx-auto bg-white">
       <CardHeader>
-        <CardTitle className="text-2xl font-bold text-center">Login</CardTitle>
+        <CardTitle className="text-2xl font-bold text-center">
+          Forgot Password
+        </CardTitle>
       </CardHeader>
       <CardContent>
         <Form {...form}>
@@ -118,36 +139,10 @@ const LoginForm = ({
                       disabled={isLoading}
                     />
                   </FormControl>
+                  <FormDescription>
+                    Enter the email address associated with your account
+                  </FormDescription>
                   <FormMessage />
-                </FormItem>
-              )}
-            />
-
-            <FormField
-              control={form.control}
-              name="password"
-              render={({ field }) => (
-                <FormItem>
-                  <FormLabel>Password</FormLabel>
-                  <FormControl>
-                    <Input
-                      placeholder="••••••••"
-                      type="password"
-                      {...field}
-                      disabled={isLoading}
-                    />
-                  </FormControl>
-                  <FormMessage />
-                  <div className="text-right">
-                    <Button
-                      variant="link"
-                      className="p-0 h-auto text-sm"
-                      onClick={onForgotPasswordClick}
-                      type="button"
-                    >
-                      Forgot password?
-                    </Button>
-                  </div>
                 </FormItem>
               )}
             />
@@ -158,19 +153,18 @@ const LoginForm = ({
               disabled={isLoading}
               isLoading={isLoading}
             >
-              {isLoading ? "Logging in..." : "Login"}
+              {isLoading ? "Sending Reset Link..." : "Send Reset Link"}
             </Button>
 
             <div className="text-center mt-4">
               <p className="text-sm text-gray-600">
-                Don't have an account?{" "}
+                Remembered your password?{" "}
                 <Button
                   variant="link"
                   className="p-0 h-auto font-semibold"
-                  onClick={onRegisterClick}
-                  type="button"
+                  onClick={onLoginClick}
                 >
-                  Register
+                  Login
                 </Button>
               </p>
             </div>
@@ -181,4 +175,4 @@ const LoginForm = ({
   );
 };
 
-export default LoginForm;
+export default ForgotPasswordForm;

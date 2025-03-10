@@ -20,7 +20,10 @@ const LoginPage = () => {
             </p>
           </div>
 
-          <LoginForm />
+          <LoginForm
+            onRegisterClick={() => navigate("/register")}
+            onForgotPasswordClick={() => navigate("/forgot-password")}
+          />
 
           <div className="mt-6 text-center">
             <p className="text-sm text-gray-600">

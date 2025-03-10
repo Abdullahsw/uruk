@@ -11,6 +11,12 @@ const CartPage = lazy(() => import("./components/cart/CartPage"));
 const OrdersPage = lazy(() => import("./components/orders/OrdersPage"));
 const LoginPage = lazy(() => import("./components/auth/LoginPage"));
 const RegisterPage = lazy(() => import("./components/auth/RegisterPage"));
+const ForgotPasswordPage = lazy(
+  () => import("./components/auth/ForgotPasswordPage"),
+);
+const PasswordResetPage = lazy(
+  () => import("./components/auth/PasswordResetPage"),
+);
 const AdminCredentialsPage = lazy(
   () => import("./components/auth/AdminCredentialsPage"),
 );
@@ -49,6 +55,8 @@ function App() {
               <Route path="/orders" element={<OrdersPage />} />
               <Route path="/login" element={<LoginPage />} />
               <Route path="/register" element={<RegisterPage />} />
+              <Route path="/forgot-password" element={<ForgotPasswordPage />} />
+              <Route path="/reset-password" element={<PasswordResetPage />} />
               <Route
                 path="/admin-credentials"
                 element={<AdminCredentialsPage />}
