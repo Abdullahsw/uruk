@@ -1,4 +1,5 @@
 import React from "react";
+import { useNavigate } from "react-router-dom";
 import { Input } from "@/components/ui/input";
 import { Button } from "@/components/ui/button";
 import { Separator } from "@/components/ui/separator";
@@ -14,6 +15,7 @@ import {
 
 const Footer = () => {
   const currentYear = new Date().getFullYear();
+  const navigate = useNavigate();
 
   return (
     <footer className="w-full bg-gray-900 text-white py-12 px-4 md:px-8 lg:px-12">
@@ -21,7 +23,7 @@ const Footer = () => {
         <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-8">
           {/* Company Information */}
           <div>
-            <h3 className="text-xl font-bold mb-4">E-Commerce Platform</h3>
+            <h3 className="text-xl font-bold mb-4">ShopHub</h3>
             <p className="text-gray-300 mb-4">
               Your one-stop solution for multi-tier e-commerce with customizable
               storefronts and seamless API integration.
@@ -61,6 +63,10 @@ const Footer = () => {
               <li>
                 <a
                   href="#"
+                  onClick={(e) => {
+                    e.preventDefault();
+                    navigate("/");
+                  }}
                   className="text-gray-300 hover:text-white transition-colors"
                 >
                   Home
@@ -69,6 +75,10 @@ const Footer = () => {
               <li>
                 <a
                   href="#"
+                  onClick={(e) => {
+                    e.preventDefault();
+                    navigate("/products");
+                  }}
                   className="text-gray-300 hover:text-white transition-colors"
                 >
                   Products
@@ -77,14 +87,22 @@ const Footer = () => {
               <li>
                 <a
                   href="#"
+                  onClick={(e) => {
+                    e.preventDefault();
+                    navigate("/products/category/bestsellers");
+                  }}
                   className="text-gray-300 hover:text-white transition-colors"
                 >
-                  Categories
+                  Bestsellers
                 </a>
               </li>
               <li>
                 <a
                   href="#"
+                  onClick={(e) => {
+                    e.preventDefault();
+                    navigate("/register");
+                  }}
                   className="text-gray-300 hover:text-white transition-colors"
                 >
                   Become a Reseller
@@ -119,18 +137,28 @@ const Footer = () => {
               </li>
               <li className="flex items-center">
                 <MessageCircle size={16} className="mr-2" />
-                <span className="text-gray-300">support@ecommerce.com</span>
+                <span className="text-gray-300">support@shophub.com</span>
               </li>
               <li>
                 <a
                   href="#"
                   className="flex items-center text-gray-300 hover:text-white transition-colors"
                 >
-                  <img
-                    src="/telegram-icon.svg"
-                    alt="Telegram"
-                    className="w-4 h-4 mr-2"
-                  />
+                  <svg
+                    xmlns="http://www.w3.org/2000/svg"
+                    width="16"
+                    height="16"
+                    viewBox="0 0 24 24"
+                    fill="none"
+                    stroke="currentColor"
+                    strokeWidth="2"
+                    strokeLinecap="round"
+                    strokeLinejoin="round"
+                    className="mr-2"
+                  >
+                    <path d="m22 2-7 20-4-9-9-4Z" />
+                    <path d="M22 2 11 13" />
+                  </svg>
                   <span>Telegram Support</span>
                 </a>
               </li>
@@ -139,11 +167,23 @@ const Footer = () => {
                   href="#"
                   className="flex items-center text-gray-300 hover:text-white transition-colors"
                 >
-                  <img
-                    src="/whatsapp-icon.svg"
-                    alt="WhatsApp"
-                    className="w-4 h-4 mr-2"
-                  />
+                  <svg
+                    xmlns="http://www.w3.org/2000/svg"
+                    width="16"
+                    height="16"
+                    viewBox="0 0 24 24"
+                    fill="none"
+                    stroke="currentColor"
+                    strokeWidth="2"
+                    strokeLinecap="round"
+                    strokeLinejoin="round"
+                    className="mr-2"
+                  >
+                    <path d="M3 21l1.65-3.8a9 9 0 1 1 3.4 2.9L3 21" />
+                    <path d="M9 10a.5.5 0 0 0 1 0V9a.5.5 0 0 0-1 0v1Z" />
+                    <path d="M14 10a.5.5 0 0 0 1 0V9a.5.5 0 0 0-1 0v1Z" />
+                    <path d="M9.5 13.5c.5 1 1.5 1 2.5 1s2-.5 2.5-1" />
+                  </svg>
                   <span>WhatsApp Support</span>
                 </a>
               </li>
@@ -173,7 +213,7 @@ const Footer = () => {
 
         <div className="flex flex-col md:flex-row justify-between items-center">
           <p className="text-gray-400 text-sm">
-            © {currentYear} E-Commerce Platform. All rights reserved.
+            © {currentYear} ShopHub. All rights reserved.
           </p>
           <div className="flex space-x-6 mt-4 md:mt-0">
             <a
