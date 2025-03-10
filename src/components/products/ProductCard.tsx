@@ -1,4 +1,5 @@
 import React from "react";
+import { useNavigate } from "react-router-dom";
 import { Star, ShoppingCart } from "lucide-react";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
@@ -9,6 +10,8 @@ import {
   CardHeader,
 } from "@/components/ui/card";
 import { useCartStore } from "@/lib/cartStore";
+import { useCurrency } from "@/lib/currencyContext";
+import { useLanguage } from "@/lib/languageContext";
 
 interface ProductCardProps {
   id?: string;
@@ -31,16 +34,40 @@ const ProductCard = ({
   isNew = false,
   onAddToCart = () => console.log("Added to cart"),
 }: ProductCardProps) => {
+  const { formatPrice } = useCurrency();
+  const { t } = useLanguage();
   const discountedPrice = discount > 0 ? price * (1 - discount / 100) : price;
   const addToCart = useCartStore((state) => state.addItem);
 
-  const handleAddToCart = () => {
-    addToCart({ id, title, price, image, discount });
-    onAddToCart(id);
+  const handleAddToCart = (e: React.MouseEvent) => {
+    e.preventDefault(); // Prevent default behavior
+    e.stopPropagation(); // Prevent navigation when clicking the add to cart button
+    try {
+      addToCart({ id, title, price, image, discount });
+      onAddToCart(id);
+    } catch (error) {
+      console.error("Error adding to cart:", error);
+    }
   };
 
+  const navigate = useNavigate();
+
   return (
-    <Card className="w-[280px] h-[350px] overflow-hidden flex flex-col bg-white transition-all duration-300 hover:shadow-lg">
+    <Card
+      className="w-full h-[350px] overflow-hidden flex flex-col bg-white transition-all duration-300 hover:shadow-lg cursor-pointer"
+      onClick={() => {
+        // Direct navigation to the exact product
+        try {
+          // Ensure we're navigating to the specific product ID
+          const productPath = `/products/${id}`;
+          navigate(productPath);
+          console.log(`Navigating to specific product: ${id}`);
+        } catch (error) {
+          console.error("Navigation error:", error);
+          navigate("/");
+        }
+      }}
+    >
       <div className="relative h-[180px] overflow-hidden bg-gray-100">
         <img
           src={image}
@@ -48,11 +75,13 @@ const ProductCard = ({
           className="w-full h-full object-cover transition-transform duration-300 hover:scale-105"
         />
         {isNew && (
-          <Badge className="absolute top-2 left-2 bg-blue-500">New</Badge>
+          <Badge className="absolute top-2 left-2 bg-blue-500">
+            {t("new")}
+          </Badge>
         )}
         {discount > 0 && (
           <Badge variant="destructive" className="absolute top-2 right-2">
-            {discount}% OFF
+            {discount}% {t("off")}
           </Badge>
         )}
       </div>
@@ -79,19 +108,23 @@ const ProductCard = ({
         <div className="flex items-center">
           {discount > 0 && (
             <span className="text-gray-400 text-sm line-through mr-2">
-              ${price.toFixed(2)}
+              {formatPrice(price)}
             </span>
           )}
           <span className="text-primary font-semibold">
-            ${discountedPrice.toFixed(2)}
+            {formatPrice(discountedPrice)}
           </span>
         </div>
       </CardContent>
 
       <CardFooter className="p-4 pt-0">
-        <Button onClick={handleAddToCart} className="w-full" size="sm">
+        <Button
+          onClick={(e) => handleAddToCart(e)}
+          className="w-full"
+          size="sm"
+        >
           <ShoppingCart className="mr-2 h-4 w-4" />
-          Add to Cart
+          {t("addToCart")}
         </Button>
       </CardFooter>
     </Card>

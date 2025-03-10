@@ -8,6 +8,7 @@ import { Input } from "@/components/ui/input";
 import {
   Form,
   FormControl,
+  FormDescription,
   FormField,
   FormItem,
   FormLabel,
@@ -31,6 +32,7 @@ const formSchema = z
     password: z.string().min(6, "Password must be at least 6 characters"),
     confirmPassword: z.string().min(6, "Confirm password is required"),
     accountType: z.enum(["customer", "reseller"]),
+    resellerPlan: z.enum(["basic", "standard", "premium"]).optional(),
   })
   .refine((data) => data.password === data.confirmPassword, {
     message: "Passwords do not match",
@@ -60,37 +62,45 @@ const RegisterForm = ({
       password: "",
       confirmPassword: "",
       accountType: "customer",
+      resellerPlan: "basic",
     },
   });
 
   const onSubmit = async (data: FormValues) => {
     setIsLoading(true);
     try {
-      // Register the user with Supabase Auth
-      const { error: signUpError, data: authData } = await supabase.auth.signUp(
-        {
-          email: data.email,
-          password: data.password,
-          options: {
-            data: {
-              name: data.name,
-              account_type: data.accountType,
-            },
-          },
+      // Create a mock user and store in localStorage
+      const user = {
+        id: `user-${Date.now()}`,
+        email: data.email,
+        user_metadata: {
+          name: data.name,
+          account_type: data.accountType,
+          reseller_plan:
+            data.accountType === "reseller" ? data.resellerPlan : undefined,
         },
-      );
+      };
 
-      if (signUpError) throw signUpError;
+      // Store user in localStorage for auth persistence
+      localStorage.setItem("user", JSON.stringify(user));
 
-      // If registration is successful
       toast({
         title: "Registration successful",
-        description:
-          "Your account has been created. Please check your email for verification.",
+        description: "Your account has been created successfully.",
       });
+
+      // Determine redirect path based on account type
+      const redirectPath =
+        data.accountType === "reseller"
+          ? "/dashboard/reseller"
+          : "/dashboard/user";
+
+      // Force page reload to update auth state
+      window.location.href = redirectPath;
+
       onSuccess();
-      navigate("/");
     } catch (error: any) {
+      console.error("Registration error:", error);
       toast({
         variant: "destructive",
         title: "Registration failed",
@@ -193,7 +203,15 @@ const RegisterForm = ({
                 <FormItem>
                   <FormLabel>Account Type</FormLabel>
                   <Select
-                    onValueChange={field.onChange}
+                    onValueChange={(value) => {
+                      field.onChange(value);
+                      // Reset reseller plan when switching account types
+                      if (value !== "reseller") {
+                        form.setValue("resellerPlan", undefined);
+                      } else {
+                        form.setValue("resellerPlan", "basic");
+                      }
+                    }}
                     defaultValue={field.value}
                     disabled={isLoading}
                   >
@@ -204,13 +222,58 @@ const RegisterForm = ({
                     </FormControl>
                     <SelectContent>
                       <SelectItem value="customer">Customer</SelectItem>
-                      <SelectItem value="reseller">Reseller</SelectItem>
+                      <SelectItem value="reseller">
+                        Reseller/Distributor
+                      </SelectItem>
                     </SelectContent>
                   </Select>
                   <FormMessage />
                 </FormItem>
               )}
             />
+
+            {form.watch("accountType") === "reseller" && (
+              <FormField
+                control={form.control}
+                name="resellerPlan"
+                render={({ field }) => (
+                  <FormItem>
+                    <FormLabel>Reseller Plan</FormLabel>
+                    <Select
+                      onValueChange={field.onChange}
+                      defaultValue={field.value}
+                      disabled={isLoading}
+                    >
+                      <FormControl>
+                        <SelectTrigger>
+                          <SelectValue placeholder="Select plan" />
+                        </SelectTrigger>
+                      </FormControl>
+                      <SelectContent>
+                        <SelectItem value="basic">
+                          Basic (1,000 products)
+                        </SelectItem>
+                        <SelectItem value="standard">
+                          Standard (5,000 products + custom domain)
+                        </SelectItem>
+                        <SelectItem value="premium">
+                          Premium (Unlimited products + custom domain)
+                        </SelectItem>
+                      </SelectContent>
+                    </Select>
+                    <FormDescription>
+                      {field.value === "basic" &&
+                        "Add up to 1,000 custom products"}
+                      {field.value === "standard" &&
+                        "Add up to 5,000 custom products with custom domain option"}
+                      {field.value === "premium" &&
+                        "Add unlimited products with custom domain included"}
+                    </FormDescription>
+                    <FormMessage />
+                  </FormItem>
+                )}
+              />
+            )}
 
             <Button
               type="submit"

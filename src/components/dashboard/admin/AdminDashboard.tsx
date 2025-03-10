@@ -1,20 +1,40 @@
-import React from "react";
+import React, { Suspense, lazy, useState, useEffect } from "react";
 import { useNavigate } from "react-router-dom";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { useAuth } from "@/lib/auth.tsx";
 import Header from "@/components/layout/Header";
 import Footer from "@/components/layout/Footer";
-import AdminUsers from "./AdminUsers";
-import AdminOrders from "./AdminOrders";
-import AdminProducts from "./AdminProducts";
-import AdminSettings from "./AdminSettings";
-import AdminResellers from "./AdminResellers";
-import AdminApiRequests from "./AdminApiRequests";
+import LoadingSpinner from "@/components/ui/loading-spinner";
+
+// Lazy load admin components
+const AdminUsers = lazy(() => import("./AdminUsers"));
+const AdminOrders = lazy(() => import("./AdminOrders"));
+const AdminProducts = lazy(() => import("./AdminProducts"));
+const AdminSettings = lazy(() => import("./AdminSettings"));
+const AdminResellers = lazy(() => import("./AdminResellers"));
+const AdminApiRequests = lazy(() => import("./AdminApiRequests"));
+const CurrencyRates = lazy(() => import("./CurrencyRates"));
+const AdvertisementManager = lazy(
+  () => import("@/components/admin/AdvertisementManager"),
+);
+const ProductSectionManager = lazy(
+  () => import("@/components/admin/ProductSectionManager"),
+);
 
 const AdminDashboard = () => {
   const navigate = useNavigate();
   const { user } = useAuth();
+  const [activeTab, setActiveTab] = useState("users");
+  const [componentsLoaded, setComponentsLoaded] = useState({
+    users: false,
+    resellers: false,
+    products: false,
+    orders: false,
+    api: false,
+    currency: false,
+    settings: false,
+  });
 
   // Check if user is an admin
   const isAdmin = user?.user_metadata?.account_type === "admin";
@@ -114,38 +134,119 @@ const AdminDashboard = () => {
           </Card>
         </div>
 
-        <Tabs defaultValue="users" className="w-full">
-          <TabsList className="grid grid-cols-6 w-full max-w-4xl mb-8">
-            <TabsTrigger value="users">Users</TabsTrigger>
-            <TabsTrigger value="resellers">Resellers</TabsTrigger>
-            <TabsTrigger value="products">Products</TabsTrigger>
-            <TabsTrigger value="orders">Orders</TabsTrigger>
-            <TabsTrigger value="api">API Requests</TabsTrigger>
-            <TabsTrigger value="settings">Settings</TabsTrigger>
+        <Tabs value={activeTab} onValueChange={setActiveTab} className="w-full">
+          <TabsList className="grid grid-cols-9 w-full max-w-7xl mb-8">
+            <TabsTrigger value="users" onClick={() => setActiveTab("users")}>
+              Users
+            </TabsTrigger>
+            <TabsTrigger
+              value="resellers"
+              onClick={() => setActiveTab("resellers")}
+            >
+              Resellers
+            </TabsTrigger>
+            <TabsTrigger
+              value="products"
+              onClick={() => setActiveTab("products")}
+            >
+              Products
+            </TabsTrigger>
+            <TabsTrigger value="orders" onClick={() => setActiveTab("orders")}>
+              Orders
+            </TabsTrigger>
+            <TabsTrigger value="api" onClick={() => setActiveTab("api")}>
+              API Requests
+            </TabsTrigger>
+            <TabsTrigger
+              value="currency"
+              onClick={() => setActiveTab("currency")}
+            >
+              Currency
+            </TabsTrigger>
+            <TabsTrigger
+              value="advertisements"
+              onClick={() => setActiveTab("advertisements")}
+            >
+              Advertisements
+            </TabsTrigger>
+            <TabsTrigger
+              value="sections"
+              onClick={() => setActiveTab("sections")}
+            >
+              Product Sections
+            </TabsTrigger>
+            <TabsTrigger
+              value="settings"
+              onClick={() => setActiveTab("settings")}
+            >
+              Settings
+            </TabsTrigger>
           </TabsList>
 
           <TabsContent value="users">
-            <AdminUsers />
+            <Suspense fallback={<LoadingSpinner text="Loading users..." />}>
+              {activeTab === "users" && <AdminUsers />}
+            </Suspense>
           </TabsContent>
 
           <TabsContent value="resellers">
-            <AdminResellers />
+            <Suspense fallback={<LoadingSpinner text="Loading resellers..." />}>
+              {activeTab === "resellers" && <AdminResellers />}
+            </Suspense>
           </TabsContent>
 
           <TabsContent value="products">
-            <AdminProducts />
+            <Suspense fallback={<LoadingSpinner text="Loading products..." />}>
+              {activeTab === "products" && <AdminProducts />}
+            </Suspense>
           </TabsContent>
 
           <TabsContent value="orders">
-            <AdminOrders />
+            <Suspense fallback={<LoadingSpinner text="Loading orders..." />}>
+              {activeTab === "orders" && <AdminOrders />}
+            </Suspense>
           </TabsContent>
 
           <TabsContent value="api">
-            <AdminApiRequests />
+            <Suspense
+              fallback={<LoadingSpinner text="Loading API requests..." />}
+            >
+              {activeTab === "api" && <AdminApiRequests />}
+            </Suspense>
+          </TabsContent>
+
+          <TabsContent value="currency">
+            <Suspense
+              fallback={<LoadingSpinner text="Loading currency rates..." />}
+            >
+              {activeTab === "currency" && <CurrencyRates />}
+            </Suspense>
+          </TabsContent>
+
+          <TabsContent value="advertisements">
+            <Suspense
+              fallback={
+                <LoadingSpinner text="Loading advertisement manager..." />
+              }
+            >
+              {activeTab === "advertisements" && <AdvertisementManager />}
+            </Suspense>
+          </TabsContent>
+
+          <TabsContent value="sections">
+            <Suspense
+              fallback={
+                <LoadingSpinner text="Loading product section manager..." />
+              }
+            >
+              {activeTab === "sections" && <ProductSectionManager />}
+            </Suspense>
           </TabsContent>
 
           <TabsContent value="settings">
-            <AdminSettings />
+            <Suspense fallback={<LoadingSpinner text="Loading settings..." />}>
+              {activeTab === "settings" && <AdminSettings />}
+            </Suspense>
           </TabsContent>
         </Tabs>
       </main>

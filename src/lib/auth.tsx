@@ -24,32 +24,67 @@ export const AuthProvider = ({ children }: { children: React.ReactNode }) => {
   const [isLoading, setIsLoading] = useState(true);
 
   useEffect(() => {
-    // Get session from local storage
-    const setInitialSession = async () => {
-      const { data } = await supabase.auth.getSession();
-      setSession(data.session);
-      setUser(data.session?.user ?? null);
-      setIsLoading(false);
+    // Get user from localStorage
+    const setInitialUser = () => {
+      try {
+        const storedUser = localStorage.getItem("user");
+        if (storedUser) {
+          const parsedUser = JSON.parse(storedUser);
+          setUser(parsedUser);
+          // Create a mock session
+          setSession({
+            access_token: "mock-token",
+            refresh_token: "mock-refresh-token",
+            expires_at: Date.now() + 3600000, // 1 hour from now
+            user: parsedUser,
+          });
+        }
+      } catch (error) {
+        console.error("Error getting user from localStorage:", error);
+      } finally {
+        setIsLoading(false);
+      }
     };
 
-    setInitialSession();
+    setInitialUser();
 
-    // Listen for auth changes
-    const {
-      data: { subscription },
-    } = supabase.auth.onAuthStateChange((_event, session) => {
-      setSession(session);
-      setUser(session?.user ?? null);
-      setIsLoading(false);
-    });
+    // Add event listener for storage changes (for multi-tab support)
+    const handleStorageChange = (event) => {
+      if (event.key === "user") {
+        if (event.newValue) {
+          const parsedUser = JSON.parse(event.newValue);
+          setUser(parsedUser);
+          setSession({
+            access_token: "mock-token",
+            refresh_token: "mock-refresh-token",
+            expires_at: Date.now() + 3600000,
+            user: parsedUser,
+          });
+        } else {
+          setUser(null);
+          setSession(null);
+        }
+      }
+    };
 
+    window.addEventListener("storage", handleStorageChange);
     return () => {
-      subscription.unsubscribe();
+      window.removeEventListener("storage", handleStorageChange);
     };
   }, []);
 
   const signOut = async () => {
-    await supabase.auth.signOut();
+    try {
+      // Remove user from localStorage
+      localStorage.removeItem("user");
+      // Reset state
+      setUser(null);
+      setSession(null);
+      // Redirect to home page
+      window.location.href = "/";
+    } catch (error) {
+      console.error("Error signing out:", error);
+    }
   };
 
   const value = {

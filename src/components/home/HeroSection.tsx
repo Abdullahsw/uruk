@@ -2,6 +2,7 @@ import React from "react";
 import { ArrowRight } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
+import { useLanguage } from "@/lib/languageContext";
 
 interface HeroSectionProps {
   title?: string;
@@ -17,13 +18,14 @@ interface HeroSectionProps {
 const HeroSection = ({
   title = "Discover Premium Products for Every Need",
   subtitle = "Shop our exclusive collection of high-quality products with fast shipping and exceptional customer service.",
-  ctaText = "Shop Now",
-  secondaryCtaText = "Learn More",
+  ctaText = "shopNow",
+  secondaryCtaText = "learnMore",
   backgroundImage = "https://images.unsplash.com/photo-1607082348824-0a96f2a4b9da?w=1400&q=80",
-  badge = "New Collection",
+  badge = "newCollection",
   onCtaClick = () => console.log("Primary CTA clicked"),
   onSecondaryCtaClick = () => console.log("Secondary CTA clicked"),
 }: HeroSectionProps) => {
+  const { t } = useLanguage();
   return (
     <div className="relative w-full h-[500px] bg-gray-900 overflow-hidden">
       {/* Background Image with Overlay */}
@@ -40,7 +42,7 @@ const HeroSection = ({
           {/* Badge */}
           {badge && (
             <Badge className="mb-4 bg-primary/90 hover:bg-primary text-white px-3 py-1">
-              {badge}
+              {t(badge)}
             </Badge>
           )}
 
@@ -61,7 +63,7 @@ const HeroSection = ({
               onClick={onCtaClick}
               className="bg-primary hover:bg-primary/90 text-white font-medium"
             >
-              {ctaText}
+              {t(ctaText)}
               <ArrowRight className="ml-2 h-5 w-5" />
             </Button>
 
@@ -71,7 +73,7 @@ const HeroSection = ({
               onClick={onSecondaryCtaClick}
               className="bg-transparent border-white text-white hover:bg-white/20"
             >
-              {secondaryCtaText}
+              {t(secondaryCtaText)}
             </Button>
           </div>
         </div>

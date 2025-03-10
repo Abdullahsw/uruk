@@ -1,4 +1,4 @@
-import React from "react";
+import React, { useState } from "react";
 import { useNavigate } from "react-router-dom";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
@@ -15,10 +15,13 @@ import SocialIntegration from "./SocialIntegration";
 const ResellerDashboard = () => {
   const navigate = useNavigate();
   const { user } = useAuth();
+  const [activeTab, setActiveTab] = useState("products");
 
   // Check if user is a reseller
   const isReseller = user?.user_metadata?.account_type === "reseller";
   const resellerPlan = user?.user_metadata?.reseller_plan || "basic";
+
+  console.log("User in ResellerDashboard:", user);
 
   if (!user || !isReseller) {
     return (
@@ -101,38 +104,69 @@ const ResellerDashboard = () => {
           </Card>
         </div>
 
-        <Tabs defaultValue="products" className="w-full">
+        <Tabs value={activeTab} onValueChange={setActiveTab} className="w-full">
           <TabsList className="grid grid-cols-6 w-full max-w-4xl mb-8">
-            <TabsTrigger value="products">Products</TabsTrigger>
-            <TabsTrigger value="orders">Orders</TabsTrigger>
-            <TabsTrigger value="customers">Customers</TabsTrigger>
-            <TabsTrigger value="analytics">Analytics</TabsTrigger>
-            <TabsTrigger value="integration">Integration</TabsTrigger>
-            <TabsTrigger value="settings">Settings</TabsTrigger>
+            <TabsTrigger
+              value="products"
+              onClick={() => setActiveTab("products")}
+            >
+              Products
+            </TabsTrigger>
+            <TabsTrigger value="orders" onClick={() => setActiveTab("orders")}>
+              Orders
+            </TabsTrigger>
+            <TabsTrigger
+              value="customers"
+              onClick={() => setActiveTab("customers")}
+            >
+              Customers
+            </TabsTrigger>
+            <TabsTrigger
+              value="analytics"
+              onClick={() => setActiveTab("analytics")}
+            >
+              Analytics
+            </TabsTrigger>
+            <TabsTrigger
+              value="integration"
+              onClick={() => setActiveTab("integration")}
+            >
+              Integration
+            </TabsTrigger>
+            <TabsTrigger
+              value="settings"
+              onClick={() => setActiveTab("settings")}
+            >
+              Settings
+            </TabsTrigger>
           </TabsList>
 
           <TabsContent value="products">
-            <ResellerProducts />
+            {activeTab === "products" && <ResellerProducts />}
           </TabsContent>
 
           <TabsContent value="orders">
-            <ResellerOrders />
+            {activeTab === "orders" && <ResellerOrders />}
           </TabsContent>
 
           <TabsContent value="customers">
-            <ResellerCustomers />
+            {activeTab === "customers" && <ResellerCustomers />}
           </TabsContent>
 
           <TabsContent value="analytics">
-            <ResellerAnalytics />
+            {activeTab === "analytics" && <ResellerAnalytics />}
           </TabsContent>
 
           <TabsContent value="integration">
-            <SocialIntegration currentPlan={resellerPlan} />
+            {activeTab === "integration" && (
+              <SocialIntegration currentPlan={resellerPlan} />
+            )}
           </TabsContent>
-          
+
           <TabsContent value="settings">
-            <ResellerSettings currentPlan={resellerPlan}
+            {activeTab === "settings" && (
+              <ResellerSettings currentPlan={resellerPlan} />
+            )}
           </TabsContent>
         </Tabs>
       </main>

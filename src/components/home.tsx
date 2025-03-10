@@ -1,128 +1,154 @@
 import React, { useState } from "react";
 import Header from "./layout/Header";
-import HeroSection from "./home/HeroSection";
-import FeaturedProducts from "./products/FeaturedProducts";
-import CategorySection from "./categories/CategorySection";
 import Footer from "./layout/Footer";
+import HeroSection from "./home/HeroSection";
+import AdvertisementCarousel from "./home/AdvertisementCarousel";
+import ProductSection from "./home/ProductSection";
 import { useAuth } from "@/lib/auth.tsx";
 
-interface HomePageProps {
-  featuredProducts?: Array<{
-    id: string;
-    image: string;
-    title: string;
-    price: number;
-    rating: number;
-    discount?: number;
-    isNew?: boolean;
-  }>;
-  categories?: Array<{
-    id: string;
-    name: string;
-    image: string;
-    productCount?: number;
-  }>;
-}
+// Mock bestseller products
+const bestsellerProducts = [
+  {
+    id: "prod-001",
+    image:
+      "https://images.unsplash.com/photo-1505740420928-5e560c06d30e?w=400&q=80",
+    title: "Premium Wireless Headphones",
+    price: 129.99,
+    rating: 4.5,
+    discount: 15,
+    isNew: false,
+  },
+  {
+    id: "prod-002",
+    image:
+      "https://images.unsplash.com/photo-1546435770-a3e426bf472b?w=400&q=80",
+    title: "Smart Watch Series 5",
+    price: 249.99,
+    rating: 4.7,
+    discount: 0,
+    isNew: true,
+  },
+  {
+    id: "prod-003",
+    image:
+      "https://images.unsplash.com/photo-1608043152269-423dbba4e7e1?w=400&q=80",
+    title: "Portable Bluetooth Speaker",
+    price: 79.99,
+    rating: 4.3,
+    discount: 10,
+    isNew: false,
+  },
+  {
+    id: "prod-004",
+    image:
+      "https://images.unsplash.com/photo-1585386959984-a4155224a1ad?w=400&q=80",
+    title: "Noise Cancelling Earbuds",
+    price: 89.99,
+    rating: 4.2,
+    discount: 0,
+    isNew: false,
+  },
+  {
+    id: "prod-005",
+    image:
+      "https://images.unsplash.com/photo-1572569511254-d8f925fe2cbb?w=400&q=80",
+    title: "Smartphone Stabilizer Gimbal",
+    price: 119.99,
+    rating: 4.1,
+    discount: 5,
+    isNew: false,
+  },
+];
 
-const HomePage = ({
-  featuredProducts = [
-    {
-      id: "prod-001",
-      image:
-        "https://images.unsplash.com/photo-1523275335684-37898b6baf30?w=400&q=80",
-      title: "Premium Wireless Headphones",
-      price: 129.99,
-      rating: 4.5,
-      discount: 15,
-      isNew: true,
-    },
-    {
-      id: "prod-002",
-      image:
-        "https://images.unsplash.com/photo-1546868871-7041f2a55e12?w=400&q=80",
-      title: "Smart Watch Series 5",
-      price: 249.99,
-      rating: 4.7,
-    },
-    {
-      id: "prod-003",
-      image:
-        "https://images.unsplash.com/photo-1585386959984-a4155224a1ad?w=400&q=80",
-      title: "Portable Bluetooth Speaker",
-      price: 79.99,
-      rating: 4.3,
-      discount: 10,
-    },
-    {
-      id: "prod-004",
-      image:
-        "https://images.unsplash.com/photo-1505740420928-5e560c06d30e?w=400&q=80",
-      title: "Noise Cancelling Earbuds",
-      price: 89.99,
-      rating: 4.2,
-      isNew: true,
-    },
-    {
-      id: "prod-005",
-      image:
-        "https://images.unsplash.com/photo-1572569511254-d8f925fe2cbb?w=400&q=80",
-      title: "Smartphone Stabilizer Gimbal",
-      price: 119.99,
-      rating: 4.1,
-    },
-  ],
-  categories = [
-    {
-      id: "cat-1",
-      name: "Electronics",
-      image:
-        "https://images.unsplash.com/photo-1498049794561-7780e7231661?w=300&q=80",
-      productCount: 120,
-    },
-    {
-      id: "cat-2",
-      name: "Fashion",
-      image:
-        "https://images.unsplash.com/photo-1445205170230-053b83016050?w=300&q=80",
-      productCount: 85,
-    },
-    {
-      id: "cat-3",
-      name: "Home & Kitchen",
-      image:
-        "https://images.unsplash.com/photo-1556911220-bff31c812dba?w=300&q=80",
-      productCount: 67,
-    },
-    {
-      id: "cat-4",
-      name: "Beauty",
-      image:
-        "https://images.unsplash.com/photo-1596462502278-27bfdc403348?w=300&q=80",
-      productCount: 43,
-    },
-    {
-      id: "cat-5",
-      name: "Sports",
-      image:
-        "https://images.unsplash.com/photo-1517649763962-0c623066013b?w=300&q=80",
-      productCount: 56,
-    },
-    {
-      id: "cat-6",
-      name: "Books",
-      image:
-        "https://images.unsplash.com/photo-1495446815901-a7297e633e8d?w=300&q=80",
-      productCount: 92,
-    },
-    {
-      id: "cat-7",
-      name: "Toys & Games",
-      image:
-        "https://images.unsplash.com/photo-1566576912321-d58ddd7a6088?w=300&q=80",
-      productCount: 38,
-    },
-  ],
-}: HomePageProps) => {
+// Mock special offers products
+const offerProducts = [
+  {
+    id: "prod-006",
+    image:
+      "https://images.unsplash.com/photo-1546435770-a3e426bf472b?w=400&q=80",
+    title: "Smart Watch Series 5",
+    price: 249.99,
+    rating: 4.7,
+    discount: 20,
+    isNew: false,
+  },
+  {
+    id: "prod-007",
+    image:
+      "https://images.unsplash.com/photo-1505740420928-5e560c06d30e?w=400&q=80",
+    title: "Premium Wireless Headphones",
+    price: 129.99,
+    rating: 4.5,
+    discount: 25,
+    isNew: false,
+  },
+  {
+    id: "prod-008",
+    image:
+      "https://images.unsplash.com/photo-1608043152269-423dbba4e7e1?w=400&q=80",
+    title: "Portable Bluetooth Speaker",
+    price: 79.99,
+    rating: 4.3,
+    discount: 30,
+    isNew: false,
+  },
+  {
+    id: "prod-009",
+    image:
+      "https://images.unsplash.com/photo-1585386959984-a4155224a1ad?w=400&q=80",
+    title: "Noise Cancelling Earbuds",
+    price: 89.99,
+    rating: 4.2,
+    discount: 15,
+    isNew: false,
+  },
+];
+
+// Mock new arrivals products
+const newArrivalsProducts = [
+  {
+    id: "prod-010",
+    image:
+      "https://images.unsplash.com/photo-1600003263720-95b45a4035d5?w=400&q=80",
+    title: 'Ultra HD Smart TV 55"',
+    price: 699.99,
+    rating: 4.8,
+    discount: 0,
+    isNew: true,
+  },
+  {
+    id: "prod-011",
+    image:
+      "https://images.unsplash.com/photo-1588872657578-7efd1f1555ed?w=400&q=80",
+    title: "Wireless Gaming Mouse",
+    price: 59.99,
+    rating: 4.6,
+    discount: 0,
+    isNew: true,
+  },
+  {
+    id: "prod-012",
+    image:
+      "https://images.unsplash.com/photo-1593642632823-8f785ba67e45?w=400&q=80",
+    title: 'Ultrabook Pro 13"',
+    price: 1299.99,
+    rating: 4.9,
+    discount: 0,
+    isNew: true,
+  },
+  {
+    id: "prod-013",
+    image:
+      "https://images.unsplash.com/photo-1511707171634-5f897ff02aa9?w=400&q=80",
+    title: "Smartphone X Pro",
+    price: 899.99,
+    rating: 4.7,
+    discount: 0,
+    isNew: true,
+  },
+];
+
+const HomePage = () => {
   const { user } = useAuth();
   const [cartItemCount, setCartItemCount] = useState(3);
 
@@ -163,47 +189,43 @@ const HomePage = ({
       />
 
       <main className="flex-grow">
-        {/* Hero Section */}
-        <HeroSection
-          title="Discover Premium Products for Every Need"
-          subtitle="Shop our exclusive collection of high-quality products with fast shipping and exceptional customer service."
-          ctaText="Shop Now"
-          secondaryCtaText="Learn More"
-          backgroundImage="https://images.unsplash.com/photo-1607082348824-0a96f2a4b9da?w=1400&q=80"
-          badge="New Collection"
-          onCtaClick={handleCtaClick}
-        />
+        {/* No Hero Section - Removed as requested */}
 
-        {/* Featured Products Section */}
-        <FeaturedProducts
-          title="Featured Products"
-          subtitle="Discover our most popular items handpicked for you"
-          products={featuredProducts}
-          onAddToCart={handleAddToCart}
-        />
+        <div className="container mx-auto px-4 py-8">
+          {/* Advertisement Carousel - Now more prominent at the top */}
+          <div className="mb-12 mt-4">
+            <h1 className="text-3xl font-bold mb-2">Welcome to ShopHub</h1>
+            <p className="text-gray-600 mb-6">
+              Discover premium products with fast shipping and exceptional
+              service
+            </p>
+            <AdvertisementCarousel />
+          </div>
 
-        {/* Categories Section */}
-        <CategorySection
-          title="Shop by Category"
-          categories={categories}
-          onCategoryClick={handleCategoryClick}
-        />
+          {/* Special Offers Section - Now first for prominence */}
+          <ProductSection
+            title="Special Offers"
+            products={offerProducts}
+            viewAllLink="/products/category/offers"
+            layout="vertical"
+          />
 
-        {/* Additional Featured Products Section with different title */}
-        <FeaturedProducts
-          title="New Arrivals"
-          subtitle="Check out our latest products just added to the store"
-          products={featuredProducts.filter((product) => product.isNew)}
-          onAddToCart={handleAddToCart}
-        />
+          {/* Bestsellers Section */}
+          <ProductSection
+            title="Bestsellers"
+            products={bestsellerProducts}
+            viewAllLink="/products/category/bestsellers"
+            layout="vertical"
+          />
 
-        {/* Special Offers Section */}
-        <FeaturedProducts
-          title="Special Offers"
-          subtitle="Limited time deals and discounts you don't want to miss"
-          products={featuredProducts.filter((product) => product.discount)}
-          onAddToCart={handleAddToCart}
-        />
+          {/* New Arrivals Section */}
+          <ProductSection
+            title="New Arrivals"
+            products={newArrivalsProducts}
+            viewAllLink="/products/category/new-arrivals"
+            layout="vertical"
+          />
+        </div>
       </main>
 
       {/* Footer */}

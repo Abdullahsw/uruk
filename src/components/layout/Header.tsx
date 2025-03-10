@@ -1,4 +1,5 @@
 import React, { useState } from "react";
+import { useNavigate } from "react-router-dom";
 import { Search, ShoppingCart, User, Menu, X } from "lucide-react";
 import { Input } from "@/components/ui/input";
 import { Button } from "@/components/ui/button";
@@ -14,6 +15,9 @@ import {
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
 import AuthModal from "@/components/auth/AuthModal";
 import { useAuth } from "@/lib/auth.tsx";
+import LanguageSwitcher from "@/components/ui/language-switcher";
+import CurrencySwitcher from "@/components/ui/currency-switcher";
+import { useLanguage } from "@/lib/languageContext";
 
 interface HeaderProps {
   logo?: string;
@@ -21,27 +25,29 @@ interface HeaderProps {
   onSearch?: (query: string) => void;
   onCartClick?: () => void;
   onProfileClick?: () => void;
-  navigationLinks?: Array<{ label: string; href: string }>;
+  navigationLinks?: Array<{ labelKey: string; href: string }>;
 }
 
 const Header = ({
   logo = "/vite.svg",
   cartItemCount = 0,
   onSearch = () => console.log("Search triggered"),
-  onCartClick = () => (window.location.href = "/cart"),
+  onCartClick = () => {}, // Will be overridden by internal handler
   onProfileClick = () => console.log("Profile clicked"),
   navigationLinks = [
-    { label: "Home", href: "/" },
-    { label: "Products", href: "/products" },
-    { label: "Categories", href: "/categories" },
-    { label: "Deals", href: "/deals" },
-    { label: "About", href: "/about" },
-    { label: "Contact", href: "/contact" },
+    { labelKey: "home", href: "/" },
+    { labelKey: "products", href: "/products" },
+    { labelKey: "categories", href: "/categories" },
+    { labelKey: "deals", href: "/deals" },
+    { labelKey: "about", href: "/about" },
+    { labelKey: "contact", href: "/contact" },
   ],
 }: HeaderProps) => {
+  const navigate = useNavigate();
   const [searchQuery, setSearchQuery] = useState("");
   const [mobileMenuOpen, setMobileMenuOpen] = useState(false);
   const { user, signOut } = useAuth();
+  const { t, dir } = useLanguage();
 
   const isLoggedIn = !!user;
   const userName = user?.user_metadata?.name || "User";
@@ -61,7 +67,7 @@ const Header = ({
   };
 
   const handleCartClick = () => {
-    window.location.href = "/cart";
+    navigate("/cart");
   };
 
   return (
@@ -69,7 +75,14 @@ const Header = ({
       <div className="container mx-auto h-full px-4 flex items-center justify-between">
         {/* Logo */}
         <div className="flex items-center">
-          <a href="/" className="flex items-center">
+          <a
+            href="#"
+            onClick={(e) => {
+              e.preventDefault();
+              navigate("/");
+            }}
+            className="flex items-center"
+          >
             <img src={logo} alt="E-commerce Logo" className="h-10 w-auto" />
             <span className="ml-2 text-xl font-bold text-primary hidden sm:inline">
               ShopHub
@@ -90,22 +103,28 @@ const Header = ({
         <nav className="hidden md:flex items-center space-x-6">
           {navigationLinks.map((link) => (
             <a
-              key={link.label}
-              href={link.href}
+              key={link.labelKey}
+              href="#"
+              onClick={(e) => {
+                e.preventDefault();
+                navigate(link.href);
+              }}
               className="text-gray-600 hover:text-primary text-sm font-medium transition-colors"
             >
-              {link.label}
+              {t(link.labelKey)}
             </a>
           ))}
         </nav>
 
         {/* Search, Cart, and User Actions */}
         <div className="hidden md:flex items-center space-x-4">
+          <LanguageSwitcher />
+          <CurrencySwitcher />
           {/* Search Form */}
           <form onSubmit={handleSearchSubmit} className="relative w-64">
             <Input
               type="search"
-              placeholder="Search products..."
+              placeholder={t("search")}
               className="pr-10"
               value={searchQuery}
               onChange={(e) => setSearchQuery(e.target.value)}
@@ -124,7 +143,7 @@ const Header = ({
           <Button
             variant="ghost"
             size="icon"
-            onClick={onCartClick}
+            onClick={handleCartClick}
             className="relative"
           >
             <ShoppingCart className="h-5 w-5" />
@@ -152,23 +171,43 @@ const Header = ({
                 </Button>
               </DropdownMenuTrigger>
               <DropdownMenuContent align="end">
-                <DropdownMenuLabel>My Account</DropdownMenuLabel>
-                <DropdownMenuItem onClick={onProfileClick}>
-                  Profile
+                <DropdownMenuLabel>{t("myAccount")}</DropdownMenuLabel>
+                <DropdownMenuItem onClick={() => navigate("/dashboard/user")}>
+                  {t("myAccount")}
                 </DropdownMenuItem>
-                <DropdownMenuItem>Orders</DropdownMenuItem>
-                <DropdownMenuItem>Wishlist</DropdownMenuItem>
+                <DropdownMenuItem onClick={() => navigate("/orders")}>
+                  {t("orders")}
+                </DropdownMenuItem>
+                <DropdownMenuItem>{t("wishlist")}</DropdownMenuItem>
+                {user?.user_metadata?.account_type === "reseller" && (
+                  <DropdownMenuItem
+                    onClick={() => navigate("/dashboard/reseller")}
+                  >
+                    {t("resellerDashboard")}
+                  </DropdownMenuItem>
+                )}
+                {user?.user_metadata?.account_type === "admin" && (
+                  <DropdownMenuItem
+                    onClick={() => navigate("/dashboard/admin")}
+                  >
+                    {t("adminDashboard")}
+                  </DropdownMenuItem>
+                )}
                 <DropdownMenuSeparator />
                 <DropdownMenuItem onClick={handleLogout}>
-                  Logout
+                  {t("logout")}
                 </DropdownMenuItem>
               </DropdownMenuContent>
             </DropdownMenu>
           ) : (
             <AuthModal
               trigger={
-                <Button variant="outline" size="sm">
-                  Sign In
+                <Button
+                  variant="outline"
+                  size="sm"
+                  onClick={() => navigate("/login")}
+                >
+                  {t("signIn")}
                 </Button>
               }
             />
@@ -184,7 +223,7 @@ const Header = ({
             <form onSubmit={handleSearchSubmit} className="relative">
               <Input
                 type="search"
-                placeholder="Search products..."
+                placeholder={t("search")}
                 className="pr-10"
                 value={searchQuery}
                 onChange={(e) => setSearchQuery(e.target.value)}
@@ -203,11 +242,16 @@ const Header = ({
             <nav className="flex flex-col space-y-2">
               {navigationLinks.map((link) => (
                 <a
-                  key={link.label}
-                  href={link.href}
+                  key={link.labelKey}
+                  href="#"
+                  onClick={(e) => {
+                    e.preventDefault();
+                    navigate(link.href);
+                    setMobileMenuOpen(false);
+                  }}
                   className="text-gray-600 hover:text-primary py-2 text-sm font-medium transition-colors"
                 >
-                  {link.label}
+                  {t(link.labelKey)}
                 </a>
               ))}
             </nav>
@@ -217,11 +261,11 @@ const Header = ({
               <Button
                 variant="ghost"
                 size="sm"
-                onClick={onCartClick}
+                onClick={handleCartClick}
                 className="relative flex items-center"
               >
                 <ShoppingCart className="h-5 w-5 mr-2" />
-                <span>Cart</span>
+                <span>{t("cart")}</span>
                 {cartItemCount > 0 && (
                   <Badge
                     variant="destructive"
@@ -240,7 +284,7 @@ const Header = ({
                   className="flex items-center"
                 >
                   <User className="h-4 w-4 mr-2" />
-                  <span>My Account</span>
+                  <span>{t("myAccount")}</span>
                 </Button>
               ) : (
                 <AuthModal
@@ -249,9 +293,13 @@ const Header = ({
                       variant="outline"
                       size="sm"
                       className="flex items-center"
+                      onClick={() => {
+                        setMobileMenuOpen(false);
+                        navigate("/login");
+                      }}
                     >
                       <User className="h-4 w-4 mr-2" />
-                      <span>Sign In</span>
+                      <span>{t("signIn")}</span>
                     </Button>
                   }
                 />
