@@ -152,7 +152,10 @@ export const AuthProvider = ({ children }: { children: React.ReactNode }) => {
     };
   }, [isSupabaseConnected]);
 
-  const signIn = async (email: string, password: string) => {
+  const signIn = async (
+    email: string,
+    password: string,
+  ): Promise<{ success: boolean; error?: string | null }> => {
     try {
       if (isSupabaseConnected) {
         // Use the loginUser function from userOperations
@@ -235,16 +238,24 @@ export const AuthProvider = ({ children }: { children: React.ReactNode }) => {
     }
   };
 
-  const signUp = async (email: string, password: string, userData: any) => {
+  const signUp = async (
+    email: string,
+    password: string,
+    userData: any,
+  ): Promise<{ success: boolean; error?: string | null }> => {
     try {
       if (isSupabaseConnected) {
         // Use the registerUser function from userOperations
-        const { success, error, user } = await registerUser(email, password, {
-          name: userData.name || email.split("@")[0],
-          username: userData.username,
-          account_type: userData.account_type || "customer",
-          reseller_plan: userData.reseller_plan,
-        });
+        const { success, error, user, session } = await registerUser(
+          email,
+          password,
+          {
+            name: userData.name || email.split("@")[0],
+            username: userData.username,
+            account_type: userData.account_type || "customer",
+            reseller_plan: userData.reseller_plan,
+          },
+        );
 
         if (!success) {
           return { success: false, error: error || "Registration failed" };

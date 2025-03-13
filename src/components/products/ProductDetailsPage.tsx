@@ -209,7 +209,7 @@ const ProductDetailsPage = () => {
   }, [productId]);
 
   const [currentImageIndex, setCurrentImageIndex] = useState(0);
-  const [quantity, setQuantity] = useState(1);
+  const [quantity, setQuantity] = useState<number>(1);
   const [selectedColor, setSelectedColor] = useState(product.colors[0]);
 
   const discountedPrice =

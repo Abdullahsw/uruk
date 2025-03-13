@@ -18,7 +18,12 @@ export const registerUser = async (
     account_type: "customer" | "reseller" | "admin";
     reseller_plan?: "basic" | "standard" | "premium";
   },
-): Promise<{ success: boolean; user: any | null; error: string | null }> => {
+): Promise<{
+  success: boolean;
+  user: any | null;
+  error: string | null;
+  session?: any;
+}> => {
   try {
     // Register the user with Supabase Auth
     const { data, error } = await supabase.auth.signUp({
@@ -37,13 +42,19 @@ export const registerUser = async (
       await createUserProfile(data.user, userData);
     }
 
-    return { success: true, user: data.user, error: null };
+    return {
+      success: true,
+      user: data.user,
+      error: null,
+      session: data.session,
+    };
   } catch (error) {
     console.error("Registration error:", error);
     return {
       success: false,
       user: null,
       error: handleSupabaseError(error),
+      session: null,
     };
   }
 };

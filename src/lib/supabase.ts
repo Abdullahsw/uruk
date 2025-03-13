@@ -57,7 +57,13 @@ if (supabaseUrl === "https://example.supabase.co") {
   ];
 
   // Override auth methods with mock implementations
-  supabase.auth.signInWithPassword = async ({ email, password }) => {
+  supabase.auth.signInWithPassword = async ({
+    email,
+    password,
+  }: {
+    email: string;
+    password: string;
+  }) => {
     const user = mockUsers.find(
       (u) => u.email === email && u.password === password,
     );
@@ -83,7 +89,15 @@ if (supabaseUrl === "https://example.supabase.co") {
     }
   };
 
-  supabase.auth.signUp = async ({ email, password, options }) => {
+  supabase.auth.signUp = async ({
+    email,
+    password,
+    options,
+  }: {
+    email: string;
+    password: string;
+    options?: { data?: any; emailRedirectTo?: string };
+  }) => {
     // Check if user already exists
     if (mockUsers.some((u) => u.email === email)) {
       return {
@@ -126,7 +140,7 @@ if (supabaseUrl === "https://example.supabase.co") {
     return { error: null };
   };
 
-  supabase.auth.updateUser = async (updates) => {
+  supabase.auth.updateUser = async (updates: any) => {
     return {
       data: { user: { ...mockUsers[0], ...updates } },
       error: null,
@@ -136,7 +150,7 @@ if (supabaseUrl === "https://example.supabase.co") {
   // Add admin namespace if it doesn't exist
   if (!supabase.auth.admin) {
     supabase.auth.admin = {
-      updateUserById: async (userId, updates) => {
+      updateUserById: async (userId: string, updates: any) => {
         return {
           data: { user: { id: userId, ...updates } },
           error: null,
@@ -148,7 +162,7 @@ if (supabaseUrl === "https://example.supabase.co") {
           error: null,
         };
       },
-      createUser: async (userData) => {
+      createUser: async (userData: any) => {
         const newUser = {
           id: `user-${Date.now()}`,
           ...userData,

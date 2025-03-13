@@ -1,23 +1,15 @@
 import React from "react";
 import { useNavigate } from "react-router-dom";
-import { Star, ShoppingCart } from "lucide-react";
-import { Badge } from "@/components/ui/badge";
+import { Star, ShoppingCart, Heart } from "lucide-react";
 import { Button } from "@/components/ui/button";
-import {
-  Card,
-  CardContent,
-  CardFooter,
-  CardHeader,
-} from "@/components/ui/card";
-import { useCartStore } from "@/lib/cartStore";
+import { Badge } from "@/components/ui/badge";
 import { useCurrency } from "@/lib/currencyContext";
-import { useLanguage } from "@/lib/languageContext";
 
 interface ProductCardProps {
-  id?: string;
-  image?: string;
-  title?: string;
-  price?: number;
+  id: string;
+  image: string;
+  title: string;
+  price: number;
   rating?: number;
   discount?: number;
   isNew?: boolean;
@@ -25,109 +17,132 @@ interface ProductCardProps {
 }
 
 const ProductCard = ({
-  id = "prod-001",
-  image = "https://images.unsplash.com/photo-1523275335684-37898b6baf30?w=400&q=80",
-  title = "Premium Wireless Headphones",
-  price = 129.99,
-  rating = 4.5,
+  id,
+  image,
+  title,
+  price,
+  rating = 0,
   discount = 0,
   isNew = false,
-  onAddToCart = () => console.log("Added to cart"),
+  onAddToCart,
 }: ProductCardProps) => {
+  const navigate = useNavigate();
   const { formatPrice } = useCurrency();
-  const { t } = useLanguage();
+
   const discountedPrice = discount > 0 ? price * (1 - discount / 100) : price;
-  const addToCart = useCartStore((state) => state.addItem);
+
+  const handleClick = () => {
+    navigate(`/products/${id}`);
+  };
 
   const handleAddToCart = (e: React.MouseEvent) => {
-    e.preventDefault(); // Prevent default behavior
-    e.stopPropagation(); // Prevent navigation when clicking the add to cart button
-    try {
-      addToCart({ id, title, price, image, discount });
+    e.stopPropagation();
+    if (onAddToCart) {
       onAddToCart(id);
-    } catch (error) {
-      console.error("Error adding to cart:", error);
     }
   };
 
-  const navigate = useNavigate();
-
   return (
-    <Card
-      className="w-full h-[350px] overflow-hidden flex flex-col bg-white transition-all duration-300 hover:shadow-lg cursor-pointer"
-      onClick={() => {
-        // Direct navigation to the exact product
-        try {
-          // Ensure we're navigating to the specific product ID
-          const productPath = `/products/${id}`;
-          navigate(productPath);
-          console.log(`Navigating to specific product: ${id}`);
-        } catch (error) {
-          console.error("Navigation error:", error);
-          navigate("/");
-        }
-      }}
+    <div
+      className="group relative bg-white rounded-lg shadow-sm overflow-hidden hover:shadow-md transition-shadow duration-300 cursor-pointer h-full flex flex-col"
+      onClick={handleClick}
     >
-      <div className="relative h-[180px] overflow-hidden bg-gray-100">
+      {/* Product Image */}
+      <div className="relative pt-[100%] bg-gray-100">
         <img
           src={image}
           alt={title}
-          className="w-full h-full object-cover transition-transform duration-300 hover:scale-105"
+          className="absolute inset-0 w-full h-full object-cover object-center"
         />
-        {isNew && (
-          <Badge className="absolute top-2 left-2 bg-blue-500">
-            {t("new")}
-          </Badge>
-        )}
+
+        {/* Discount Badge */}
         {discount > 0 && (
-          <Badge variant="destructive" className="absolute top-2 right-2">
-            {discount}% {t("off")}
+          <Badge
+            variant="destructive"
+            className="absolute top-2 right-2 font-medium"
+          >
+            {discount}% OFF
           </Badge>
         )}
+
+        {/* New Badge */}
+        {isNew && (
+          <Badge className="absolute top-2 left-2 bg-blue-500 font-medium">
+            New
+          </Badge>
+        )}
+
+        {/* Quick Action Buttons - Visible on Hover */}
+        <div className="absolute bottom-0 left-0 right-0 p-2 bg-gradient-to-t from-black/50 to-transparent opacity-0 group-hover:opacity-100 transition-opacity duration-300 flex justify-between">
+          <Button
+            variant="secondary"
+            size="icon"
+            className="h-8 w-8 rounded-full bg-white/90 hover:bg-white"
+            onClick={(e) => {
+              e.stopPropagation();
+              // Add to wishlist functionality would go here
+            }}
+          >
+            <Heart className="h-4 w-4" />
+          </Button>
+
+          <Button
+            variant="secondary"
+            size="icon"
+            className="h-8 w-8 rounded-full bg-white/90 hover:bg-white"
+            onClick={handleAddToCart}
+          >
+            <ShoppingCart className="h-4 w-4" />
+          </Button>
+        </div>
       </div>
 
-      <CardHeader className="p-4 pb-0">
-        <h3 className="font-medium text-sm line-clamp-2 h-10">{title}</h3>
-      </CardHeader>
+      {/* Product Info */}
+      <div className="p-4 flex-grow flex flex-col justify-between">
+        <div>
+          <h3 className="font-medium text-sm line-clamp-2 mb-1">{title}</h3>
 
-      <CardContent className="p-4 pt-2 flex-grow">
-        <div className="flex items-center mb-2">
-          {Array(5)
-            .fill(0)
-            .map((_, i) => (
-              <Star
-                key={i}
-                size={14}
-                className={`${i < Math.floor(rating) ? "text-yellow-400" : "text-gray-300"} ${i === Math.floor(rating) && rating % 1 > 0 ? "text-yellow-400 opacity-50" : ""}`}
-                fill={i < Math.floor(rating) ? "currentColor" : "none"}
-              />
-            ))}
-          <span className="text-xs text-gray-500 ml-1">{rating}</span>
-        </div>
-
-        <div className="flex items-center">
-          {discount > 0 && (
-            <span className="text-gray-400 text-sm line-through mr-2">
-              {formatPrice(price)}
+          <div className="flex items-center mb-2">
+            <div className="flex">
+              {[...Array(5)].map((_, i) => (
+                <Star
+                  key={i}
+                  size={12}
+                  className={`${i < Math.floor(rating) ? "text-yellow-400" : "text-gray-300"} ${i === Math.floor(rating) && rating % 1 > 0 ? "text-yellow-400 opacity-50" : ""}`}
+                  fill={i < Math.floor(rating) ? "currentColor" : "none"}
+                />
+              ))}
+            </div>
+            <span className="text-xs text-gray-500 ml-1">
+              {(rating || 0).toFixed(1)}
             </span>
-          )}
-          <span className="text-primary font-semibold">
-            {formatPrice(discountedPrice)}
-          </span>
+          </div>
         </div>
-      </CardContent>
 
-      <CardFooter className="p-4 pt-0">
-        <Button
-          onClick={(e) => handleAddToCart(e)}
-          className="w-full"
-          size="sm"
-        >
-          <ShoppingCart className="mr-2 h-4 w-4" />
-          {t("addToCart")}
-        </Button>
-      </CardFooter>
-    </Card>
+        <div>
+          <div className="flex items-center">
+            {discount > 0 && (
+              <span className="text-gray-400 text-xs line-through mr-2">
+                {formatPrice(price)}
+              </span>
+            )}
+            <span className="text-primary font-semibold">
+              {formatPrice(discountedPrice)}
+            </span>
+          </div>
+
+          <Button
+            variant="outline"
+            size="sm"
+            className="w-full mt-2"
+            onClick={handleAddToCart}
+          >
+            <ShoppingCart className="h-3.5 w-3.5 mr-1" />
+            Add to Cart
+          </Button>
+        </div>
+      </div>
+    </div>
   );
 };
 
