@@ -18,7 +18,7 @@ export const registerUser = async (
     account_type: "customer" | "reseller" | "admin";
     reseller_plan?: "basic" | "standard" | "premium";
   },
-) => {
+): Promise<{ success: boolean; user: any | null; error: string | null }> => {
   try {
     // Register the user with Supabase Auth
     const { data, error } = await supabase.auth.signUp({
@@ -113,7 +113,15 @@ export const createUserProfile = async (
  * @param password User's password
  * @returns Object with success status, session data, and error message if any
  */
-export const loginUser = async (email: string, password: string) => {
+export const loginUser = async (
+  email: string,
+  password: string,
+): Promise<{
+  success: boolean;
+  session: any | null;
+  user: any | null;
+  error: string | null;
+}> => {
   try {
     const { data, error } = await supabase.auth.signInWithPassword({
       email,
@@ -144,7 +152,9 @@ export const loginUser = async (email: string, password: string) => {
  * @param userId The user's ID
  * @returns User profile data
  */
-export const getUserProfile = async (userId: string) => {
+export const getUserProfile = async (
+  userId: string,
+): Promise<{ success: boolean; profile: any | null; error: string | null }> => {
   try {
     const { data, error } = await supabase
       .from("users")
@@ -179,7 +189,7 @@ export const updateUserProfile = async (
     reseller_plan?: "basic" | "standard" | "premium";
     [key: string]: any; // Allow other fields
   },
-) => {
+): Promise<{ success: boolean; profile: any | null; error: string | null }> => {
   try {
     // Don't allow updating critical fields like id, email, account_type directly
     const safeUpdates = { ...updates };
@@ -236,7 +246,7 @@ export const updateUserProfile = async (
 export const updatePassword = async (
   currentPassword: string,
   newPassword: string,
-) => {
+): Promise<{ success: boolean; error: string | null }> => {
   try {
     // First verify the current password by attempting to reauthenticate
     const { data: authData } = await supabase.auth.getSession();
@@ -296,7 +306,12 @@ export const getUsersByRole = async (
   role: "customer" | "reseller" | "admin",
   limit = 100,
   offset = 0,
-) => {
+): Promise<{
+  success: boolean;
+  users?: any[];
+  count?: number;
+  error?: string;
+}> => {
   try {
     const { data, error, count } = await supabase
       .from("users")
@@ -323,7 +338,10 @@ export const getUsersByRole = async (
  * @param limit Maximum number of users to return
  * @returns List of matching users
  */
-export const searchUsers = async (query: string, limit = 20) => {
+export const searchUsers = async (
+  query: string,
+  limit = 20,
+): Promise<{ success: boolean; users?: any[]; error?: string }> => {
   try {
     // Convert query to lowercase for case-insensitive search
     const searchTerm = query.toLowerCase();
@@ -353,7 +371,9 @@ export const searchUsers = async (query: string, limit = 20) => {
  * @param userId The ID of the user to delete
  * @returns Success status and error message if any
  */
-export const deleteUser = async (userId: string) => {
+export const deleteUser = async (
+  userId: string,
+): Promise<{ success: boolean; error?: string }> => {
   try {
     // Check if the current user is an admin
     const { data: authData } = await supabase.auth.getSession();

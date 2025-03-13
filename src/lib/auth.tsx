@@ -93,7 +93,7 @@ export const AuthProvider = ({ children }: { children: React.ReactNode }) => {
             refresh_token: "mock-refresh-token",
             expires_at: Date.now() + 3600000, // 1 hour from now
             user: parsedUser,
-          });
+          } as Session);
         }
       } catch (error) {
         console.error("Error initializing auth:", error);
@@ -134,7 +134,7 @@ export const AuthProvider = ({ children }: { children: React.ReactNode }) => {
             refresh_token: "mock-refresh-token",
             expires_at: Date.now() + 3600000,
             user: parsedUser,
-          });
+          } as Session);
         } else {
           setUser(null);
           setSession(null);
@@ -171,7 +171,7 @@ export const AuthProvider = ({ children }: { children: React.ReactNode }) => {
         // For admin credentials demo
         if (email === "admin@shophub.com" && password === "Admin123!") {
           // Set user in localStorage
-          const userData = {
+          const userData: any = {
             id: "admin-user-id",
             email: email,
             user_metadata: {
@@ -205,7 +205,7 @@ export const AuthProvider = ({ children }: { children: React.ReactNode }) => {
           accountType = "reseller";
         }
 
-        const userData = {
+        const userData: any = {
           id: `user-${Date.now()}`,
           email,
           user_metadata: {
@@ -253,7 +253,7 @@ export const AuthProvider = ({ children }: { children: React.ReactNode }) => {
         return { success: true };
       } else {
         // Fallback for demo mode
-        const mockUser = {
+        const mockUser: any = {
           id: `user-${Date.now()}`,
           email,
           user_metadata: userData,

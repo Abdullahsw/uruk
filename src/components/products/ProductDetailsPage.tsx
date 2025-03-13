@@ -201,7 +201,7 @@ const ProductDetailsPage = () => {
       console.warn(`Product with ID ${productId} not found, using fallback`);
       setLoading(false);
       return mockProducts[0];
-    } catch (error) {
+    } catch (error: any) {
       console.error("Error finding product:", error);
       setLoading(false);
       return mockProducts[0];

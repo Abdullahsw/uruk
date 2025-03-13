@@ -6,7 +6,9 @@ import { handleSupabaseError, safeSupabaseOperation } from "../errorHandler";
  * @param email The email address of the user
  * @returns Object with success status and message
  */
-export const requestPasswordReset = async (email: string) => {
+export const requestPasswordReset = async (
+  email: string,
+): Promise<{ success: boolean; message: string; token: string | null }> => {
   try {
     // First check if the user exists
     const { data: userData, error: userError } = await supabase
@@ -102,7 +104,10 @@ export const requestPasswordReset = async (email: string) => {
  * @param newPassword The new password
  * @returns Object with success status and message
  */
-export const resetPassword = async (token: string, newPassword: string) => {
+export const resetPassword = async (
+  token: string,
+  newPassword: string,
+): Promise<{ success: boolean; message: string }> => {
   try {
     // First verify the token
     const { data, error } = await supabase.rpc("verify_reset_token", {

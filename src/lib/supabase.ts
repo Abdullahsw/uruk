@@ -32,7 +32,7 @@ if (supabaseUrl === "https://example.supabase.co") {
   );
 
   // Mock the auth methods to prevent "Failed to fetch" errors
-  const mockUsers = [
+  const mockUsers: any[] = [
     {
       id: "admin-user-id",
       email: "admin@shophub.com",
@@ -70,6 +70,7 @@ if (supabaseUrl === "https://example.supabase.co") {
             access_token: "mock-token",
             refresh_token: "mock-refresh",
             expires_at: Date.now() + 3600,
+            user: user,
           },
         },
         error: null,
@@ -110,7 +111,7 @@ if (supabaseUrl === "https://example.supabase.co") {
 
   supabase.auth.getSession = async () => {
     return {
-      data: { session: null },
+      data: { session: null, user: null },
       error: null,
     };
   };
