@@ -19,35 +19,33 @@ export const registerUser = async (
     reseller_plan?: "basic" | "standard" | "premium";
   },
 ) => {
-  return await safeSupabaseOperation(
-    async () => {
-      // Register the user with Supabase Auth
-      const { data, error } = await supabase.auth.signUp({
-        email,
-        password,
-        options: {
-          data: userData,
-          emailRedirectTo: `${window.location.origin}/login`,
-        },
-      });
+  try {
+    // Register the user with Supabase Auth
+    const { data, error } = await supabase.auth.signUp({
+      email,
+      password,
+      options: {
+        data: userData,
+        emailRedirectTo: `${window.location.origin}/login`,
+      },
+    });
 
-      if (error) throw error;
+    if (error) throw error;
 
-      // If registration successful, create a profile in the users table
-      if (data.user) {
-        await createUserProfile(data.user, userData);
-      }
+    // If registration successful, create a profile in the users table
+    if (data.user) {
+      await createUserProfile(data.user, userData);
+    }
 
-      return { success: true, user: data.user };
-    },
-    (error) => {
-      console.error("Registration error:", error);
-      return {
-        success: false,
-        error: handleSupabaseError(error),
-      };
-    },
-  );
+    return { success: true, user: data.user, error: null };
+  } catch (error) {
+    console.error("Registration error:", error);
+    return {
+      success: false,
+      user: null,
+      error: handleSupabaseError(error),
+    };
+  }
 };
 
 /**
@@ -116,25 +114,29 @@ export const createUserProfile = async (
  * @returns Object with success status, session data, and error message if any
  */
 export const loginUser = async (email: string, password: string) => {
-  return await safeSupabaseOperation(
-    async () => {
-      const { data, error } = await supabase.auth.signInWithPassword({
-        email,
-        password,
-      });
+  try {
+    const { data, error } = await supabase.auth.signInWithPassword({
+      email,
+      password,
+    });
 
-      if (error) throw error;
+    if (error) throw error;
 
-      return { success: true, session: data.session, user: data.user };
-    },
-    (error) => {
-      console.error("Login error:", error);
-      return {
-        success: false,
-        error: handleSupabaseError(error),
-      };
-    },
-  );
+    return {
+      success: true,
+      session: data.session,
+      user: data.user,
+      error: null,
+    };
+  } catch (error) {
+    console.error("Login error:", error);
+    return {
+      success: false,
+      session: null,
+      user: null,
+      error: handleSupabaseError(error),
+    };
+  }
 };
 
 /**
@@ -143,26 +145,24 @@ export const loginUser = async (email: string, password: string) => {
  * @returns User profile data
  */
 export const getUserProfile = async (userId: string) => {
-  return await safeSupabaseOperation(
-    async () => {
-      const { data, error } = await supabase
-        .from("users")
-        .select("*")
-        .eq("id", userId)
-        .single();
+  try {
+    const { data, error } = await supabase
+      .from("users")
+      .select("*")
+      .eq("id", userId)
+      .single();
 
-      if (error) throw error;
+    if (error) throw error;
 
-      return { success: true, profile: data };
-    },
-    (error) => {
-      console.error("Error fetching user profile:", error);
-      return {
-        success: false,
-        error: handleSupabaseError(error),
-      };
-    },
-  );
+    return { success: true, profile: data, error: null };
+  } catch (error) {
+    console.error("Error fetching user profile:", error);
+    return {
+      success: false,
+      profile: null,
+      error: handleSupabaseError(error),
+    };
+  }
 };
 
 /**
@@ -180,53 +180,51 @@ export const updateUserProfile = async (
     [key: string]: any; // Allow other fields
   },
 ) => {
-  return await safeSupabaseOperation(
-    async () => {
-      // Don't allow updating critical fields like id, email, account_type directly
-      const safeUpdates = { ...updates };
-      delete safeUpdates.id;
-      delete safeUpdates.email;
-      delete safeUpdates.account_type;
-      delete safeUpdates.created_at;
+  try {
+    // Don't allow updating critical fields like id, email, account_type directly
+    const safeUpdates = { ...updates };
+    delete safeUpdates.id;
+    delete safeUpdates.email;
+    delete safeUpdates.account_type;
+    delete safeUpdates.created_at;
 
-      // Add updated_at timestamp
-      safeUpdates.updated_at = new Date().toISOString();
+    // Add updated_at timestamp
+    safeUpdates.updated_at = new Date().toISOString();
 
-      // Update the profile
-      const { data, error } = await supabase
-        .from("users")
-        .update(safeUpdates)
-        .eq("id", userId)
-        .select()
-        .single();
+    // Update the profile
+    const { data, error } = await supabase
+      .from("users")
+      .update(safeUpdates)
+      .eq("id", userId)
+      .select()
+      .single();
 
-      if (error) throw error;
+    if (error) throw error;
 
-      // Also update user metadata in auth.users if needed
-      if (updates.name) {
-        try {
-          await supabase.auth.updateUser({
-            data: { name: updates.name },
-          });
-        } catch (metadataError) {
-          console.warn(
-            "Failed to update auth metadata, but profile was updated",
-            metadataError,
-          );
-          // Continue anyway since the main profile update succeeded
-        }
+    // Also update user metadata in auth.users if needed
+    if (updates.name) {
+      try {
+        await supabase.auth.updateUser({
+          data: { name: updates.name },
+        });
+      } catch (metadataError) {
+        console.warn(
+          "Failed to update auth metadata, but profile was updated",
+          metadataError,
+        );
+        // Continue anyway since the main profile update succeeded
       }
+    }
 
-      return { success: true, profile: data };
-    },
-    (error) => {
-      console.error("Error updating user profile:", error);
-      return {
-        success: false,
-        error: handleSupabaseError(error),
-      };
-    },
-  );
+    return { success: true, profile: data, error: null };
+  } catch (error) {
+    console.error("Error updating user profile:", error);
+    return {
+      success: false,
+      profile: null,
+      error: handleSupabaseError(error),
+    };
+  }
 };
 
 /**
@@ -239,55 +237,52 @@ export const updatePassword = async (
   currentPassword: string,
   newPassword: string,
 ) => {
-  return await safeSupabaseOperation(
-    async () => {
-      // First verify the current password by attempting to reauthenticate
-      const { data: authData } = await supabase.auth.getSession();
-      if (!authData.session) {
-        return {
-          success: false,
-          error: "You must be logged in to change your password",
-        };
-      }
-
-      const email = authData.session.user.email;
-      if (!email) {
-        return {
-          success: false,
-          error: "User email not found",
-        };
-      }
-
-      // Try to sign in with current password to verify it
-      const { error: signInError } = await supabase.auth.signInWithPassword({
-        email,
-        password: currentPassword,
-      });
-
-      if (signInError) {
-        return {
-          success: false,
-          error: "Current password is incorrect",
-        };
-      }
-
-      // Update the password
-      const { error } = await supabase.auth.updateUser({
-        password: newPassword,
-      });
-
-      if (error) throw error;
-
-      return { success: true };
-    },
-    (error) => {
-      console.error("Error updating password:", error);
+  try {
+    // First verify the current password by attempting to reauthenticate
+    const { data: authData } = await supabase.auth.getSession();
+    if (!authData.session) {
       return {
         success: false,
-        error: handleSupabaseError(error),
+        error: "You must be logged in to change your password",
       };
-    },
-  );
+    }
+
+    const email = authData.session.user.email;
+    if (!email) {
+      return {
+        success: false,
+        error: "User email not found",
+      };
+    }
+
+    // Try to sign in with current password to verify it
+    const { error: signInError } = await supabase.auth.signInWithPassword({
+      email,
+      password: currentPassword,
+    });
+
+    if (signInError) {
+      return {
+        success: false,
+        error: "Current password is incorrect",
+      };
+    }
+
+    // Update the password
+    const { error } = await supabase.auth.updateUser({
+      password: newPassword,
+    });
+
+    if (error) throw error;
+
+    return { success: true, error: null };
+  } catch (error) {
+    console.error("Error updating password:", error);
+    return {
+      success: false,
+      error: handleSupabaseError(error),
+    };
+  }
 };
 
 /**

@@ -64,7 +64,14 @@ if (supabaseUrl === "https://example.supabase.co") {
 
     if (user) {
       return {
-        data: { user, session: { access_token: "mock-token" } },
+        data: {
+          user,
+          session: {
+            access_token: "mock-token",
+            refresh_token: "mock-refresh",
+            expires_at: Date.now() + 3600,
+          },
+        },
         error: null,
       };
     } else {
@@ -79,7 +86,7 @@ if (supabaseUrl === "https://example.supabase.co") {
     // Check if user already exists
     if (mockUsers.some((u) => u.email === email)) {
       return {
-        data: { user: null },
+        data: { user: null, session: null },
         error: { message: "User already registered" },
       };
     }
@@ -124,4 +131,34 @@ if (supabaseUrl === "https://example.supabase.co") {
       error: null,
     };
   };
+
+  // Add admin namespace if it doesn't exist
+  if (!supabase.auth.admin) {
+    supabase.auth.admin = {
+      updateUserById: async (userId, updates) => {
+        return {
+          data: { user: { id: userId, ...updates } },
+          error: null,
+        };
+      },
+      listUsers: async () => {
+        return {
+          data: { users: mockUsers },
+          error: null,
+        };
+      },
+      createUser: async (userData) => {
+        const newUser = {
+          id: `user-${Date.now()}`,
+          ...userData,
+          created_at: new Date().toISOString(),
+        };
+        mockUsers.push(newUser);
+        return {
+          data: { user: newUser },
+          error: null,
+        };
+      },
+    };
+  }
 }

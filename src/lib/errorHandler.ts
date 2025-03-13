@@ -78,3 +78,6 @@ export const safeSupabaseOperation = async <T>(
     return { data: null, error: errorMessage };
   }
 };
+
+// This function is deprecated and will be removed in future versions
+// Use direct try/catch blocks instead for better type safety

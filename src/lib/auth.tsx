@@ -12,12 +12,12 @@ type AuthContextType = {
   signIn: (
     email: string,
     password: string,
-  ) => Promise<{ success: boolean; error?: string }>;
+  ) => Promise<{ success: boolean; error?: string | null }>;
   signUp: (
     email: string,
     password: string,
     userData: any,
-  ) => Promise<{ success: boolean; error?: string }>;
+  ) => Promise<{ success: boolean; error?: string | null }>;
   isSupabaseConnected: boolean;
   refreshUser: () => Promise<void>;
 };
@@ -27,8 +27,8 @@ export const AuthContext = createContext<AuthContextType>({
   user: null,
   isLoading: true,
   signOut: async () => {},
-  signIn: async () => ({ success: false }),
-  signUp: async () => ({ success: false }),
+  signIn: async () => ({ success: false, error: null }),
+  signUp: async () => ({ success: false, error: null }),
   isSupabaseConnected: false,
   refreshUser: async () => {},
 });
