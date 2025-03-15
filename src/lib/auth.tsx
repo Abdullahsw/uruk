@@ -92,6 +92,8 @@ export const AuthProvider = ({ children }: { children: React.ReactNode }) => {
             access_token: "mock-token",
             refresh_token: "mock-refresh-token",
             expires_at: Date.now() + 3600000, // 1 hour from now
+            expires_in: 3600,
+            token_type: "bearer",
             user: parsedUser,
           } as Session);
         }
@@ -133,6 +135,8 @@ export const AuthProvider = ({ children }: { children: React.ReactNode }) => {
             access_token: "mock-token",
             refresh_token: "mock-refresh-token",
             expires_at: Date.now() + 3600000,
+            expires_in: 3600,
+            token_type: "bearer",
             user: parsedUser,
           } as Session);
         } else {
@@ -190,8 +194,10 @@ export const AuthProvider = ({ children }: { children: React.ReactNode }) => {
             access_token: "mock-token",
             refresh_token: "mock-refresh-token",
             expires_at: Date.now() + 3600000,
+            expires_in: 3600,
+            token_type: "bearer",
             user: userData,
-          });
+          } as Session);
 
           return { success: true };
         }
@@ -224,8 +230,10 @@ export const AuthProvider = ({ children }: { children: React.ReactNode }) => {
           access_token: "mock-token",
           refresh_token: "mock-refresh-token",
           expires_at: Date.now() + 3600000,
+          expires_in: 3600,
+          token_type: "bearer",
           user: userData,
-        });
+        } as Session);
 
         return { success: true };
       }
@@ -277,8 +285,10 @@ export const AuthProvider = ({ children }: { children: React.ReactNode }) => {
           access_token: "mock-token",
           refresh_token: "mock-refresh-token",
           expires_at: Date.now() + 3600000,
+          expires_in: 3600,
+          token_type: "bearer",
           user: mockUser,
-        });
+        } as Session);
 
         return { success: true };
       }

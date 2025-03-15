@@ -57,6 +57,7 @@ if (supabaseUrl === "https://example.supabase.co") {
   ];
 
   // Override auth methods with mock implementations
+  // @ts-ignore - Ignoring type errors for mock implementation
   supabase.auth.signInWithPassword = async ({
     email,
     password,
@@ -89,6 +90,7 @@ if (supabaseUrl === "https://example.supabase.co") {
     }
   };
 
+  // @ts-ignore - Ignoring type errors for mock implementation
   supabase.auth.signUp = async ({
     email,
     password,
@@ -130,6 +132,7 @@ if (supabaseUrl === "https://example.supabase.co") {
     };
   };
 
+  // @ts-ignore - Ignoring type errors for mock implementation
   supabase.auth.onAuthStateChange = () => {
     return {
       data: { subscription: { unsubscribe: () => {} } },
@@ -156,6 +159,7 @@ if (supabaseUrl === "https://example.supabase.co") {
           error: null,
         };
       },
+      // @ts-ignore - Ignoring type errors for mock implementation
       listUsers: async () => {
         return {
           data: { users: mockUsers },
