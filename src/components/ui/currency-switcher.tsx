@@ -38,7 +38,7 @@ const CurrencySwitcher = () => {
   const { language } = useLanguage();
 
   const currentCurr =
-    currencies.find((curr) => curr.code === currency) || currencies[0];
+    currencies.find((curr) => curr.code === currency) || currencies[1]; // Default to USD (index 1)
 
   const getCurrencyName = (nameKey: string) => {
     return currencyNames[nameKey][language];

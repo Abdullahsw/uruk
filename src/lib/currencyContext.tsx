@@ -32,7 +32,7 @@ const defaultExchangeRates = {
 };
 
 const CurrencyContext = createContext<CurrencyContextType>({
-  currency: "IQD",
+  currency: "USD",
   setCurrency: () => {},
   formatPrice: () => "",
   exchangeRates: defaultExchangeRates,
@@ -46,7 +46,7 @@ export const useCurrency = () => useContext(CurrencyContext);
 export const CurrencyProvider: React.FC<{ children: React.ReactNode }> = ({
   children,
 }) => {
-  const [currency, setCurrency] = useState<Currency>("IQD");
+  const [currency, setCurrency] = useState<Currency>("USD");
   const [exchangeRates, setExchangeRatesState] = useState(defaultExchangeRates);
   const [lastUpdated, setLastUpdated] = useState<Date | null>(null);
   const [isLoading, setIsLoading] = useState(true);

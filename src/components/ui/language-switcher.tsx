@@ -19,7 +19,7 @@ const LanguageSwitcher = () => {
   const { language, setLanguage } = useLanguage();
 
   const currentLang =
-    languages.find((lang) => lang.code === language) || languages[0];
+    languages.find((lang) => lang.code === language) || languages[1]; // Default to English (index 1)
 
   return (
     <DropdownMenu>
