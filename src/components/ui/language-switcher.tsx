@@ -10,7 +10,6 @@ import { Globe } from "lucide-react";
 import { useLanguage } from "@/lib/languageContext";
 
 const languages = [
-  { code: "ar", name: "العربية" },
   { code: "en", name: "English" },
   { code: "ku", name: "کوردی" },
 ];
@@ -19,7 +18,7 @@ const LanguageSwitcher = () => {
   const { language, setLanguage } = useLanguage();
 
   const currentLang =
-    languages.find((lang) => lang.code === language) || languages[1]; // Default to English (index 1)
+    languages.find((lang) => lang.code === language) || languages[0]; // Default to English (index 0)
 
   return (
     <DropdownMenu>
@@ -33,7 +32,7 @@ const LanguageSwitcher = () => {
         {languages.map((lang) => (
           <DropdownMenuItem
             key={lang.code}
-            onClick={() => setLanguage(lang.code as any)}
+            onClick={() => setLanguage(lang.code as "en" | "ku")}
             className={lang.code === language ? "bg-accent" : ""}
           >
             {lang.name}
