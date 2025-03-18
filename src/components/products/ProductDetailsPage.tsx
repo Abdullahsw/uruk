@@ -468,7 +468,7 @@ const ProductDetailsPage = () => {
                       onClick={handleAddToCart}
                     >
                       <ShoppingCart className="mr-2 h-5 w-5" />
-                      {t("addToCart")}
+                      Add to Cart
                     </Button>
                     <Button variant="outline" size="icon" className="h-12 w-12">
                       <Heart className="h-5 w-5" />

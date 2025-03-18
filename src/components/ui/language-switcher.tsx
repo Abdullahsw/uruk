@@ -3,9 +3,9 @@ import { Button } from "@/components/ui/button";
 import { Globe } from "lucide-react";
 import { useLanguage } from "@/lib/languageContext";
 
-// Simplified language switcher that only shows English
+// English-only language switcher
 const LanguageSwitcher = () => {
-  const { language, setLanguage } = useLanguage();
+  const { setLanguage } = useLanguage();
 
   return (
     <Button
