@@ -4,6 +4,7 @@ type LanguageContextType = {
   language: string;
   setLanguage: (language: string) => void;
   t: (key: string) => string;
+  dir: string;
 };
 
 const translations = {
@@ -22,6 +23,7 @@ const LanguageContext = createContext<LanguageContextType>({
   language: "en",
   setLanguage: () => {},
   t: (key) => key,
+  dir: "ltr",
 });
 
 export const useLanguage = () => useContext(LanguageContext);
@@ -37,8 +39,11 @@ export function LanguageProvider({ children }: { children: React.ReactNode }) {
     );
   };
 
+  // Set direction based on language
+  const dir = language === "ar" ? "rtl" : "ltr";
+
   return (
-    <LanguageContext.Provider value={{ language, setLanguage, t }}>
+    <LanguageContext.Provider value={{ language, setLanguage, t, dir }}>
       {children}
     </LanguageContext.Provider>
   );

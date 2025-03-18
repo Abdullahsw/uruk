@@ -47,7 +47,7 @@ const Header = ({
   const [searchQuery, setSearchQuery] = useState("");
   const [mobileMenuOpen, setMobileMenuOpen] = useState(false);
   const { user, signOut } = useAuth();
-  const { t, dir } = useLanguage();
+  const { t } = useLanguage();
 
   const isLoggedIn = !!user;
   const userName = user?.user_metadata?.name || "User";

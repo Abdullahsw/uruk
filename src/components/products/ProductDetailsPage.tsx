@@ -224,7 +224,6 @@ const ProductDetailsPage = () => {
       price: product.price,
       image: product.images[0],
       discount: product.discount,
-      quantity,
       color: selectedColor,
     });
   };

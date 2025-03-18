@@ -8,6 +8,7 @@ export interface CartItem {
   image: string;
   quantity: number;
   discount?: number;
+  color?: string;
 }
 
 interface DeliveryAddress {
@@ -35,7 +36,7 @@ interface CartStore {
   getTotal: () => number;
 }
 
-export const useCartStore = create<CartStore>(
+export const useCartStore = create<CartStore>()(
   persist(
     (set, get) => ({
       items: [],
