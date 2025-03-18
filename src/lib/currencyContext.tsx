@@ -43,9 +43,7 @@ const CurrencyContext = createContext<CurrencyContextType>({
 
 export const useCurrency = () => useContext(CurrencyContext);
 
-export const CurrencyProvider: React.FC<{ children: React.ReactNode }> = ({
-  children,
-}) => {
+export function CurrencyProvider({ children }: { children: React.ReactNode }) {
   const [currency, setCurrency] = useState<Currency>("USD");
   const [exchangeRates, setExchangeRatesState] = useState(defaultExchangeRates);
   const [lastUpdated, setLastUpdated] = useState<Date | null>(null);
@@ -150,6 +148,15 @@ export const CurrencyProvider: React.FC<{ children: React.ReactNode }> = ({
   };
 
   const formatPrice = (price: number): string => {
+    // Handle undefined or null price
+    if (price === undefined || price === null) {
+      return currency === "USD"
+        ? "0.00"
+        : currency === "SAR"
+          ? "0.00 SAR"
+          : "0 IQD";
+    }
+
     // Convert price to current currency
     const convertedPrice = convertPrice(price, "USD", currency);
 
@@ -181,4 +188,4 @@ export const CurrencyProvider: React.FC<{ children: React.ReactNode }> = ({
       {children}
     </CurrencyContext.Provider>
   );
-};
+}

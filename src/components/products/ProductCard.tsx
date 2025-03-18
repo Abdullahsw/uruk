@@ -114,7 +114,7 @@ const ProductCard = ({
               ))}
             </div>
             <span className="text-xs text-gray-500 ml-1">
-              {(rating || 0).toFixed(1)}
+              {rating ? rating.toFixed(1) : "0.0"}
             </span>
           </div>
         </div>
