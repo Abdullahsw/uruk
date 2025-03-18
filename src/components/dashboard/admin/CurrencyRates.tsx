@@ -24,7 +24,6 @@ import { Separator } from "@/components/ui/separator";
 import { useToast } from "@/components/ui/use-toast";
 import { Save, RefreshCw } from "lucide-react";
 import { useCurrency } from "@/lib/currencyContext";
-import { useLanguage } from "@/lib/languageContext";
 
 const formSchema = z.object({
   usdToIqd: z.coerce.number().positive("Rate must be positive"),
@@ -39,7 +38,6 @@ const CurrencyRates = () => {
   const [isLoading, setIsLoading] = useState(false);
   const [lastUpdated, setLastUpdated] = useState(new Date());
   const { exchangeRates, setExchangeRates } = useCurrency();
-  const { t } = useLanguage();
 
   const form = useForm<FormValues>({
     resolver: zodResolver(formSchema),
@@ -62,7 +60,7 @@ const CurrencyRates = () => {
 
       if (result.success) {
         toast({
-          title: t("currencyRates"),
+          title: "Currency Rates",
           description: "The exchange rates have been updated successfully.",
         });
       } else {
@@ -119,13 +117,13 @@ const CurrencyRates = () => {
   return (
     <Card>
       <CardHeader>
-        <CardTitle>{t("currencyRates")}</CardTitle>
-        <CardDescription>{t("manageCurrencyRates")}</CardDescription>
+        <CardTitle>Currency Rates</CardTitle>
+        <CardDescription>Manage currency exchange rates</CardDescription>
       </CardHeader>
       <CardContent>
         <div className="flex justify-between items-center mb-6">
           <p className="text-sm text-gray-500">
-            {t("lastUpdated")} {lastUpdated.toLocaleString()}
+            Last updated: {lastUpdated.toLocaleString()}
           </p>
           <Button
             variant="outline"
@@ -133,7 +131,7 @@ const CurrencyRates = () => {
             disabled={isLoading}
           >
             <RefreshCw className="h-4 w-4 mr-2" />
-            {t("fetchLatestRates")}
+            Fetch Latest Rates
           </Button>
         </div>
 
@@ -145,7 +143,7 @@ const CurrencyRates = () => {
                 name="usdToIqd"
                 render={({ field }) => (
                   <FormItem>
-                    <FormLabel>{t("usdToIqdRate")}</FormLabel>
+                    <FormLabel>USD to IQD Rate</FormLabel>
                     <FormControl>
                       <Input
                         type="number"
@@ -166,7 +164,7 @@ const CurrencyRates = () => {
                 name="sarToIqd"
                 render={({ field }) => (
                   <FormItem>
-                    <FormLabel>{t("sarToIqdRate")}</FormLabel>
+                    <FormLabel>SAR to IQD Rate</FormLabel>
                     <FormControl>
                       <Input
                         type="number"
@@ -187,7 +185,7 @@ const CurrencyRates = () => {
                 name="usdToSar"
                 render={({ field }) => (
                   <FormItem>
-                    <FormLabel>{t("usdToSarRate")}</FormLabel>
+                    <FormLabel>USD to SAR Rate</FormLabel>
                     <FormControl>
                       <Input
                         type="number"
@@ -207,7 +205,7 @@ const CurrencyRates = () => {
             <Separator className="my-6" />
 
             <div className="bg-gray-50 p-4 rounded-md mb-6">
-              <h3 className="font-medium mb-2">{t("conversionPreview")}</h3>
+              <h3 className="font-medium mb-2">Conversion Preview</h3>
               <div className="grid grid-cols-1 md:grid-cols-3 gap-4 text-sm">
                 <div>
                   <p className="text-gray-500">100 USD =</p>
@@ -232,7 +230,7 @@ const CurrencyRates = () => {
 
             <Button type="submit" disabled={isLoading}>
               <Save className="h-4 w-4 mr-2" />
-              {isLoading ? t("saving") : t("saveRates")}
+              {isLoading ? "Saving..." : "Save Rates"}
             </Button>
           </form>
         </Form>
