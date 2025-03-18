@@ -33,7 +33,7 @@ interface LoginFormProps {
 const LoginForm = ({
   onSuccess = () => {},
   onRegisterClick = () => {},
-  onForgotPasswordClick = () => navigate("/forgot-password"),
+  onForgotPasswordClick = () => {}, // Will be overridden by the component
 }: LoginFormProps) => {
   const [isLoading, setIsLoading] = useState(false);
   const { toast } = useToast();
