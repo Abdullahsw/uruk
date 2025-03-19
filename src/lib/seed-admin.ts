@@ -46,7 +46,7 @@ export const seedAdminUser = async () => {
     } else {
       // Check if admin exists in the returned users
       const adminExists = existingUsers?.users?.some(
-        (user) =>
+        (user: any) =>
           user.email === "admin@shophub.com" &&
           user.user_metadata?.account_type === "admin",
       );
