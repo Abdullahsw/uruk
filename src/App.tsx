@@ -85,6 +85,10 @@ function App() {
                 element={<Navigate to="/admin/login" replace />}
               />
               <Route
+                path="/admin/*"
+                element={<Navigate to="/admin/login" replace />}
+              />
+              <Route
                 path="/dashboard/user"
                 element={
                   <AuthGuard>

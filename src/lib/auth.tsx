@@ -207,14 +207,10 @@ export const AuthProvider = ({ children }: { children: React.ReactNode }) => {
             user: userData,
           } as Session);
 
-          // Check if the login is coming from the admin login page
-          const isAdminLogin =
-            window.location.pathname.includes("/admin/login");
+          // Always redirect admin to the admin dashboard
           return {
             success: true,
-            redirectPath: isAdminLogin
-              ? "/dashboard/admin"
-              : "/dashboard/admin",
+            redirectPath: "/dashboard/admin",
           };
         }
 

@@ -29,6 +29,33 @@ const AdminLoginPage = () => {
     setError("");
 
     try {
+      // Check if using demo credentials
+      if (email === "admin@shophub.com" && password === "Admin123!") {
+        // Directly handle admin login for demo
+        toast({
+          title: "Admin login successful",
+          description: "You have been logged in as an administrator.",
+        });
+
+        // Create admin user in localStorage
+        const userData = {
+          id: "admin-user-id",
+          email: email,
+          user_metadata: {
+            name: "Admin User",
+            account_type: "admin",
+          },
+          created_at: new Date().toISOString(),
+        };
+
+        localStorage.setItem("user", JSON.stringify(userData));
+
+        // Redirect to admin dashboard
+        navigate("/dashboard/admin");
+        return;
+      }
+
+      // Regular sign in process
       const result = await signIn(email, password);
 
       if (result.success) {
@@ -38,7 +65,7 @@ const AdminLoginPage = () => {
         });
 
         // Redirect to admin dashboard
-        navigate("/dashboard/admin");
+        navigate(result.redirectPath || "/dashboard/admin");
       } else {
         setError(result.error || "Invalid admin credentials");
         toast({
@@ -48,6 +75,7 @@ const AdminLoginPage = () => {
         });
       }
     } catch (err) {
+      console.error("Login error:", err);
       setError("An unexpected error occurred");
       toast({
         title: "Login error",
