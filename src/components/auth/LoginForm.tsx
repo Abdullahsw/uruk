@@ -51,21 +51,14 @@ const LoginForm = ({
     setIsLoading(true);
     try {
       // Use the loginUser function from userOperations
-      const { success, error, user, session } = await loginUser(
+      const { success, error, user, session, redirectPath } = await loginUser(
         data.email,
         data.password,
       );
 
       if (success) {
-        // Determine redirect path based on account type
-        let redirectPath = "/dashboard/user";
-        const accountType = user?.user_metadata?.account_type;
-
-        if (accountType === "admin") {
-          redirectPath = "/dashboard/admin";
-        } else if (accountType === "reseller") {
-          redirectPath = "/dashboard/reseller";
-        }
+        // Use the redirectPath from loginUser or default to user dashboard
+        const finalRedirectPath = redirectPath || "/dashboard/user";
 
         toast({
           title: "Login successful",
@@ -76,7 +69,7 @@ const LoginForm = ({
         onSuccess();
 
         // Navigate to the appropriate dashboard
-        navigate(redirectPath);
+        navigate(finalRedirectPath);
       } else {
         toast({
           variant: "destructive",

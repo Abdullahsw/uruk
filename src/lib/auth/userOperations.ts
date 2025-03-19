@@ -132,6 +132,7 @@ export const loginUser = async (
   session: any | null;
   user: any | null;
   error: string | null;
+  redirectPath?: string;
 }> => {
   try {
     const { data, error } = await supabase.auth.signInWithPassword({
@@ -141,11 +142,22 @@ export const loginUser = async (
 
     if (error) throw error;
 
+    // Determine redirect path based on account type
+    let redirectPath = "/dashboard/user";
+    const accountType = data.user?.user_metadata?.account_type;
+
+    if (accountType === "admin") {
+      redirectPath = "/dashboard/admin";
+    } else if (accountType === "reseller") {
+      redirectPath = "/dashboard/reseller";
+    }
+
     return {
       success: true,
       session: data.session,
       user: data.user,
       error: null,
+      redirectPath,
     };
   } catch (error) {
     console.error("Login error:", error);

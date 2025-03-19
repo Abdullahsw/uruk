@@ -1,10 +1,11 @@
 import { Suspense, lazy } from "react";
-import { useRoutes, Routes, Route } from "react-router-dom";
+import { useRoutes, Routes, Route, Navigate } from "react-router-dom";
 import Home from "./components/home";
 import routes from "tempo-routes";
 import { AuthProvider } from "./lib/auth.tsx";
 import { Toaster } from "./components/ui/toaster";
 import ErrorBoundary from "./components/ErrorBoundary";
+import AuthGuard from "./components/auth/AuthGuard";
 
 // Lazy load pages for better performance
 const CartPage = lazy(() => import("./components/cart/CartPage"));
@@ -20,6 +21,7 @@ const PasswordResetPage = lazy(
 const AdminCredentialsPage = lazy(
   () => import("./components/auth/AdminCredentialsPage"),
 );
+const AdminLoginPage = lazy(() => import("./components/admin/AdminLoginPage"));
 const ResellerDashboard = lazy(
   () => import("./components/dashboard/reseller/ResellerDashboard"),
 );
@@ -61,12 +63,35 @@ function App() {
                 path="/admin-credentials"
                 element={<AdminCredentialsPage />}
               />
+              <Route path="/admin/login" element={<AdminLoginPage />} />
               <Route
                 path="/dashboard/reseller"
-                element={<ResellerDashboard />}
+                element={
+                  <AuthGuard requiredRole="reseller">
+                    <ResellerDashboard />
+                  </AuthGuard>
+                }
               />
-              <Route path="/dashboard/admin" element={<AdminDashboard />} />
-              <Route path="/dashboard/user" element={<UserDashboard />} />
+              <Route
+                path="/dashboard/admin/*"
+                element={
+                  <AuthGuard requiredRole="admin">
+                    <AdminDashboard />
+                  </AuthGuard>
+                }
+              />
+              <Route
+                path="/admin"
+                element={<Navigate to="/admin/login" replace />}
+              />
+              <Route
+                path="/dashboard/user"
+                element={
+                  <AuthGuard>
+                    <UserDashboard />
+                  </AuthGuard>
+                }
+              />
               {/* Category routes must come before product routes to avoid conflicts */}
               <Route
                 path="/products/category/:categoryId"
@@ -78,6 +103,10 @@ function App() {
               />
               {/* Fallback route for any other product-related paths */}
               <Route path="/products" element={<CategoryPage />} />
+              {/* Add this before the catchall route for Tempo */}
+              {import.meta.env.VITE_TEMPO === "true" && (
+                <Route path="/tempobook/*" />
+              )}
               {/* Error fallback route to prevent white screens */}
               <Route path="*" element={<Home />} />
             </Routes>

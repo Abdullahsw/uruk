@@ -12,7 +12,11 @@ type AuthContextType = {
   signIn: (
     email: string,
     password: string,
-  ) => Promise<{ success: boolean; error?: string | null }>;
+  ) => Promise<{
+    success: boolean;
+    error?: string | null;
+    redirectPath?: string;
+  }>;
   signUp: (
     email: string,
     password: string,
@@ -159,11 +163,15 @@ export const AuthProvider = ({ children }: { children: React.ReactNode }) => {
   const signIn = async (
     email: string,
     password: string,
-  ): Promise<{ success: boolean; error?: string | null }> => {
+  ): Promise<{
+    success: boolean;
+    error?: string | null;
+    redirectPath?: string;
+  }> => {
     try {
       if (isSupabaseConnected) {
         // Use the loginUser function from userOperations
-        const { success, error, user, session } = await loginUser(
+        const { success, error, user, session, redirectPath } = await loginUser(
           email,
           password,
         );
@@ -172,7 +180,7 @@ export const AuthProvider = ({ children }: { children: React.ReactNode }) => {
           return { success: false, error: error || "Invalid credentials" };
         }
 
-        return { success: true };
+        return { success: true, redirectPath };
       } else {
         // Fallback for demo mode
         // For admin credentials demo
@@ -199,7 +207,7 @@ export const AuthProvider = ({ children }: { children: React.ReactNode }) => {
             user: userData,
           } as Session);
 
-          return { success: true };
+          return { success: true, redirectPath: "/dashboard/admin" };
         }
 
         // Create mock user based on email pattern for demo
@@ -235,7 +243,14 @@ export const AuthProvider = ({ children }: { children: React.ReactNode }) => {
           user: userData,
         } as Session);
 
-        return { success: true };
+        let redirectPath = "/dashboard/user";
+        if (accountType === "admin") {
+          redirectPath = "/dashboard/admin";
+        } else if (accountType === "reseller") {
+          redirectPath = "/dashboard/reseller";
+        }
+
+        return { success: true, redirectPath };
       }
     } catch (error: any) {
       console.error("Sign in error:", error);
