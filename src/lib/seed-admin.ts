@@ -80,7 +80,7 @@ export const seedAdminUser = async () => {
       try {
         const { data: userData } = await supabaseAdmin.auth.admin.listUsers();
         const adminUser = userData?.users?.find(
-          (u) => u.email === "admin@shophub.com",
+          (u: any) => u.email === "admin@shophub.com",
         );
 
         if (adminUser && adminUser.id) {
