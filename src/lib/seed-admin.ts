@@ -3,6 +3,7 @@ import { handleSupabaseError } from "./supabaseHelpers";
 
 // This function creates an admin user if it doesn't exist
 export const seedAdminUser = async () => {
+  console.log("Attempting to seed admin user...");
   try {
     // First check if we can connect to Supabase
     const { data: healthCheck, error: healthError } = await supabase
@@ -58,7 +59,9 @@ export const seedAdminUser = async () => {
     }
 
     // If admin doesn't exist, create one
-    console.log("Creating admin user...");
+    console.log(
+      "Creating admin user with email: admin@shophub.com and password: Admin123!",
+    );
 
     // Try to use supabaseAdmin if available for creating users
     if (supabaseAdmin) {
@@ -72,6 +75,27 @@ export const seedAdminUser = async () => {
           },
           email_confirm: true,
         });
+
+      // Explicitly confirm the email
+      try {
+        const { data: userData } = await supabaseAdmin.auth.admin.listUsers();
+        const adminUser = userData?.users?.find(
+          (u) => u.email === "admin@shophub.com",
+        );
+
+        if (adminUser && adminUser.id) {
+          await supabaseAdmin.auth.admin.updateUserById(adminUser.id, {
+            email_confirm: true,
+            user_metadata: {
+              name: "Admin User",
+              account_type: "admin",
+            },
+          });
+          console.log("Admin user email confirmed explicitly");
+        }
+      } catch (confirmError) {
+        console.error("Error confirming admin email:", confirmError);
+      }
 
       if (adminCreateError) {
         console.error(

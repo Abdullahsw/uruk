@@ -31,28 +31,72 @@ const AdminLoginPage = () => {
     try {
       // Check if using demo credentials
       if (email === "admin@shophub.com" && password === "Admin123!") {
-        // Directly handle admin login for demo
-        toast({
-          title: "Admin login successful",
-          description: "You have been logged in as an administrator.",
-        });
+        try {
+          // Try to sign in with Supabase first
+          const supabaseResult = await signIn(email, password);
 
-        // Create admin user in localStorage
-        const userData = {
-          id: "admin-user-id",
-          email: email,
-          user_metadata: {
-            name: "Admin User",
-            account_type: "admin",
-          },
-          created_at: new Date().toISOString(),
-        };
+          if (supabaseResult.success) {
+            toast({
+              title: "Admin login successful",
+              description: "You have been logged in as an administrator.",
+            });
 
-        localStorage.setItem("user", JSON.stringify(userData));
+            // Redirect to admin dashboard
+            navigate("/dashboard/admin");
+            return;
+          }
 
-        // Redirect to admin dashboard
-        navigate("/dashboard/admin");
-        return;
+          // If Supabase login fails, fall back to demo mode
+          console.log("Supabase login failed, using demo mode");
+
+          // Directly handle admin login for demo
+          toast({
+            title: "Admin login successful (Demo Mode)",
+            description: "You have been logged in as an administrator.",
+          });
+
+          // Create admin user in localStorage
+          const userData = {
+            id: "admin-user-id",
+            email: email,
+            user_metadata: {
+              name: "Admin User",
+              account_type: "admin",
+            },
+            created_at: new Date().toISOString(),
+          };
+
+          localStorage.setItem("user", JSON.stringify(userData));
+
+          // Redirect to admin dashboard
+          navigate("/dashboard/admin");
+          return;
+        } catch (error) {
+          console.error("Error during admin login:", error);
+
+          // Fall back to demo mode on any error
+          toast({
+            title: "Admin login successful (Demo Mode)",
+            description: "You have been logged in as an administrator.",
+          });
+
+          // Create admin user in localStorage
+          const userData = {
+            id: "admin-user-id",
+            email: email,
+            user_metadata: {
+              name: "Admin User",
+              account_type: "admin",
+            },
+            created_at: new Date().toISOString(),
+          };
+
+          localStorage.setItem("user", JSON.stringify(userData));
+
+          // Redirect to admin dashboard
+          navigate("/dashboard/admin");
+          return;
+        }
       }
 
       // Regular sign in process
