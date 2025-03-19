@@ -7,7 +7,7 @@ import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { useToast } from "@/components/ui/use-toast";
 import { useAuth } from "@/lib/auth.tsx";
 import { useCartStore } from "@/lib/cartStore";
-import CartItem from "./CartItem.jsx";
+import CartItem from "./CartItem.tsx";
 import CartSummary from "./CartSummary";
 import DeliveryAddressForm from "./DeliveryAddressForm";
 import Header from "../layout/Header";
