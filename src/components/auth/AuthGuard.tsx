@@ -33,6 +33,7 @@ const AuthGuard: React.FC<AuthGuardProps> = ({
           variant: "destructive",
         });
         navigate("/admin/login", { replace: true });
+        return;
       } else {
         toast({
           title: "Authentication required",

@@ -3,8 +3,8 @@ import { useNavigate } from "react-router-dom";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { useAuth } from "@/lib/auth.tsx";
-import Header from "@/components/layout/Header";
-import Footer from "@/components/layout/Footer";
+import AdminHeader from "@/components/layout/AdminHeader";
+import AdminFooter from "@/components/layout/AdminFooter";
 import LoadingSpinner from "@/components/ui/loading-spinner";
 
 // Lazy load admin components
@@ -42,7 +42,7 @@ const AdminDashboard = () => {
   if (!user || !isAdmin) {
     return (
       <div className="min-h-screen flex flex-col bg-white">
-        <Header />
+        <AdminHeader />
         <main className="flex-grow container mx-auto px-4 py-8 flex items-center justify-center">
           <div className="text-center">
             <h2 className="text-xl font-semibold mb-2">
@@ -59,14 +59,14 @@ const AdminDashboard = () => {
             </button>
           </div>
         </main>
-        <Footer />
+        <AdminFooter />
       </div>
     );
   }
 
   return (
     <div className="min-h-screen flex flex-col bg-gray-50">
-      <Header />
+      <AdminHeader />
 
       <main className="flex-grow container mx-auto px-4 py-8">
         <div className="mb-8">
@@ -251,7 +251,7 @@ const AdminDashboard = () => {
         </Tabs>
       </main>
 
-      <Footer />
+      <AdminFooter />
     </div>
   );
 };

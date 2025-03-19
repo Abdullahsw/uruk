@@ -207,7 +207,15 @@ export const AuthProvider = ({ children }: { children: React.ReactNode }) => {
             user: userData,
           } as Session);
 
-          return { success: true, redirectPath: "/dashboard/admin" };
+          // Check if the login is coming from the admin login page
+          const isAdminLogin =
+            window.location.pathname.includes("/admin/login");
+          return {
+            success: true,
+            redirectPath: isAdminLogin
+              ? "/dashboard/admin"
+              : "/dashboard/admin",
+          };
         }
 
         // Create mock user based on email pattern for demo
