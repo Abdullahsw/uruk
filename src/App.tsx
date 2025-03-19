@@ -84,6 +84,7 @@ function App() {
                 path="/admin"
                 element={<Navigate to="/admin/login" replace />}
               />
+              <Route path="/admin/login" element={<AdminLoginPage />} />
               <Route
                 path="/admin/*"
                 element={<Navigate to="/admin/login" replace />}
