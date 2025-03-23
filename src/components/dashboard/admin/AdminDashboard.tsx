@@ -26,18 +26,20 @@ const AdminDashboard = () => {
   const navigate = useNavigate();
   const { user } = useAuth();
   const [activeTab, setActiveTab] = useState("users");
-  const [componentsLoaded, setComponentsLoaded] = useState({
-    users: false,
-    resellers: false,
-    products: false,
-    orders: false,
-    api: false,
-    currency: false,
-    settings: false,
-  });
+  const [searchValue, setSearchValue] = useState("");
+  const [isLoading, setIsLoading] = useState(true);
 
   // Check if user is an admin
   const isAdmin = user?.user_metadata?.account_type === "admin";
+
+  useEffect(() => {
+    // Set a short timeout to ensure components render
+    const timer = setTimeout(() => {
+      setIsLoading(false);
+    }, 1500);
+
+    return () => clearTimeout(timer);
+  }, []);
 
   if (!user || !isAdmin) {
     return (
@@ -74,6 +76,15 @@ const AdminDashboard = () => {
           <p className="text-gray-600 mt-2">
             Manage your platform, users, and resellers
           </p>
+          <div className="mt-4">
+            <input
+              type="text"
+              placeholder="Search..."
+              value={searchValue}
+              onChange={(e) => setSearchValue(e.target.value)}
+              className="px-4 py-2 border border-gray-300 rounded-md w-full max-w-md"
+            />
+          </div>
         </div>
 
         <div className="grid grid-cols-1 md:grid-cols-4 gap-6 mb-8">
@@ -136,74 +147,46 @@ const AdminDashboard = () => {
 
         <Tabs value={activeTab} onValueChange={setActiveTab} className="w-full">
           <TabsList className="grid grid-cols-9 w-full max-w-7xl mb-8">
-            <TabsTrigger value="users" onClick={() => setActiveTab("users")}>
-              Users
-            </TabsTrigger>
-            <TabsTrigger
-              value="resellers"
-              onClick={() => setActiveTab("resellers")}
-            >
-              Resellers
-            </TabsTrigger>
-            <TabsTrigger
-              value="products"
-              onClick={() => setActiveTab("products")}
-            >
-              Products
-            </TabsTrigger>
-            <TabsTrigger value="orders" onClick={() => setActiveTab("orders")}>
-              Orders
-            </TabsTrigger>
-            <TabsTrigger value="api" onClick={() => setActiveTab("api")}>
-              API Requests
-            </TabsTrigger>
-            <TabsTrigger
-              value="currency"
-              onClick={() => setActiveTab("currency")}
-            >
-              Currency
-            </TabsTrigger>
-            <TabsTrigger
-              value="advertisements"
-              onClick={() => setActiveTab("advertisements")}
-            >
-              Advertisements
-            </TabsTrigger>
-            <TabsTrigger
-              value="sections"
-              onClick={() => setActiveTab("sections")}
-            >
-              Product Sections
-            </TabsTrigger>
-            <TabsTrigger
-              value="settings"
-              onClick={() => setActiveTab("settings")}
-            >
-              Settings
-            </TabsTrigger>
+            <TabsTrigger value="users">Users</TabsTrigger>
+            <TabsTrigger value="resellers">Resellers</TabsTrigger>
+            <TabsTrigger value="products">Products</TabsTrigger>
+            <TabsTrigger value="orders">Orders</TabsTrigger>
+            <TabsTrigger value="api">API Requests</TabsTrigger>
+            <TabsTrigger value="currency">Currency</TabsTrigger>
+            <TabsTrigger value="advertisements">Advertisements</TabsTrigger>
+            <TabsTrigger value="sections">Product Sections</TabsTrigger>
+            <TabsTrigger value="settings">Settings</TabsTrigger>
           </TabsList>
 
           <TabsContent value="users">
             <Suspense fallback={<LoadingSpinner text="Loading users..." />}>
-              {activeTab === "users" && <AdminUsers />}
+              {activeTab === "users" && (
+                <AdminUsers searchValue={searchValue} />
+              )}
             </Suspense>
           </TabsContent>
 
           <TabsContent value="resellers">
             <Suspense fallback={<LoadingSpinner text="Loading resellers..." />}>
-              {activeTab === "resellers" && <AdminResellers />}
+              {activeTab === "resellers" && (
+                <AdminResellers searchValue={searchValue} />
+              )}
             </Suspense>
           </TabsContent>
 
           <TabsContent value="products">
             <Suspense fallback={<LoadingSpinner text="Loading products..." />}>
-              {activeTab === "products" && <AdminProducts />}
+              {activeTab === "products" && (
+                <AdminProducts searchValue={searchValue} />
+              )}
             </Suspense>
           </TabsContent>
 
           <TabsContent value="orders">
             <Suspense fallback={<LoadingSpinner text="Loading orders..." />}>
-              {activeTab === "orders" && <AdminOrders />}
+              {activeTab === "orders" && (
+                <AdminOrders searchValue={searchValue} />
+              )}
             </Suspense>
           </TabsContent>
 
@@ -211,7 +194,9 @@ const AdminDashboard = () => {
             <Suspense
               fallback={<LoadingSpinner text="Loading API requests..." />}
             >
-              {activeTab === "api" && <AdminApiRequests />}
+              {activeTab === "api" && (
+                <AdminApiRequests searchValue={searchValue} />
+              )}
             </Suspense>
           </TabsContent>
 
@@ -219,7 +204,9 @@ const AdminDashboard = () => {
             <Suspense
               fallback={<LoadingSpinner text="Loading currency rates..." />}
             >
-              {activeTab === "currency" && <CurrencyRates />}
+              {activeTab === "currency" && (
+                <CurrencyRates searchValue={searchValue} />
+              )}
             </Suspense>
           </TabsContent>
 
@@ -229,7 +216,9 @@ const AdminDashboard = () => {
                 <LoadingSpinner text="Loading advertisement manager..." />
               }
             >
-              {activeTab === "advertisements" && <AdvertisementManager />}
+              {activeTab === "advertisements" && (
+                <AdvertisementManager searchValue={searchValue} />
+              )}
             </Suspense>
           </TabsContent>
 
@@ -239,13 +228,17 @@ const AdminDashboard = () => {
                 <LoadingSpinner text="Loading product section manager..." />
               }
             >
-              {activeTab === "sections" && <ProductSectionManager />}
+              {activeTab === "sections" && (
+                <ProductSectionManager searchValue={searchValue} />
+              )}
             </Suspense>
           </TabsContent>
 
           <TabsContent value="settings">
             <Suspense fallback={<LoadingSpinner text="Loading settings..." />}>
-              {activeTab === "settings" && <AdminSettings />}
+              {activeTab === "settings" && (
+                <AdminSettings searchValue={searchValue} />
+              )}
             </Suspense>
           </TabsContent>
         </Tabs>
