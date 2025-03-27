@@ -1,4 +1,4 @@
-import React, { useState } from "react";
+import React, { useState, useEffect } from "react";
 import { useNavigate } from "react-router-dom";
 import {
   Card,
@@ -17,11 +17,26 @@ import { Lock, Mail } from "lucide-react";
 const AdminLoginPage = () => {
   const navigate = useNavigate();
   const { toast } = useToast();
-  const { signIn } = useAuth();
+  const { signIn, user } = useAuth();
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
   const [isLoading, setIsLoading] = useState(false);
   const [error, setError] = useState("");
+
+  // Check if user is already logged in as admin
+  useEffect(() => {
+    const storedUser = localStorage.getItem("user");
+    if (storedUser) {
+      try {
+        const userData = JSON.parse(storedUser);
+        if (userData?.user_metadata?.account_type === "admin") {
+          navigate("/dashboard/admin");
+        }
+      } catch (e) {
+        console.error("Error parsing stored user:", e);
+      }
+    }
+  }, [navigate, user]);
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
@@ -31,72 +46,31 @@ const AdminLoginPage = () => {
     try {
       // Check if using demo credentials
       if (email === "admin@shophub.com" && password === "Admin123!") {
-        try {
-          // Try to sign in with Supabase first
-          const supabaseResult = await signIn(email, password);
+        // Directly handle admin login for demo mode
+        toast({
+          title: "Admin login successful (Demo Mode)",
+          description: "You have been logged in as an administrator.",
+        });
 
-          if (supabaseResult.success) {
-            toast({
-              title: "Admin login successful",
-              description: "You have been logged in as an administrator.",
-            });
+        // Create admin user in localStorage
+        const userData = {
+          id: "admin-user-id",
+          email: email,
+          user_metadata: {
+            name: "Admin User",
+            account_type: "admin",
+          },
+          created_at: new Date().toISOString(),
+        };
 
-            // Redirect to admin dashboard
-            navigate("/dashboard/admin");
-            return;
-          }
+        localStorage.setItem("user", JSON.stringify(userData));
 
-          // If Supabase login fails, fall back to demo mode
-          console.log("Supabase login failed, using demo mode");
-
-          // Directly handle admin login for demo
-          toast({
-            title: "Admin login successful (Demo Mode)",
-            description: "You have been logged in as an administrator.",
-          });
-
-          // Create admin user in localStorage
-          const userData = {
-            id: "admin-user-id",
-            email: email,
-            user_metadata: {
-              name: "Admin User",
-              account_type: "admin",
-            },
-            created_at: new Date().toISOString(),
-          };
-
-          localStorage.setItem("user", JSON.stringify(userData));
-
-          // Redirect to admin dashboard
+        // Redirect to admin dashboard with a slight delay to ensure state updates
+        setTimeout(() => {
+          setIsLoading(false);
           navigate("/dashboard/admin");
-          return;
-        } catch (error) {
-          console.error("Error during admin login:", error);
-
-          // Fall back to demo mode on any error
-          toast({
-            title: "Admin login successful (Demo Mode)",
-            description: "You have been logged in as an administrator.",
-          });
-
-          // Create admin user in localStorage
-          const userData = {
-            id: "admin-user-id",
-            email: email,
-            user_metadata: {
-              name: "Admin User",
-              account_type: "admin",
-            },
-            created_at: new Date().toISOString(),
-          };
-
-          localStorage.setItem("user", JSON.stringify(userData));
-
-          // Redirect to admin dashboard
-          navigate("/dashboard/admin");
-          return;
-        }
+        }, 500);
+        return;
       }
 
       // Regular sign in process
@@ -109,7 +83,9 @@ const AdminLoginPage = () => {
         });
 
         // Redirect to admin dashboard
-        navigate(result.redirectPath || "/dashboard/admin");
+        setTimeout(() => {
+          navigate(result.redirectPath || "/dashboard/admin");
+        }, 500);
       } else {
         setError(result.error || "Invalid admin credentials");
         toast({
